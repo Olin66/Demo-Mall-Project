@@ -19,6 +19,7 @@ buildNumber.properties
 **/target/
 
 **/.gitignore
+**/*.iml
 
 **/node_modules/
 **/.vscode/
