@@ -24,3 +24,5 @@ buildNumber.properties
 **/node_modules/
 **/.vscode/
 **/.idea/
+
+/renren-fast-vue
