@@ -97,7 +97,7 @@ export default {
       this.$http({
         url: this.$http.adornUrl("/product/category/list/tree"),
         method: "get",
-      }).then(({data}) => {
+      }).then(({ data }) => {
         this.menus = data.data;
       });
     },
@@ -155,7 +155,7 @@ export default {
       this.$http({
         url: this.$http.adornUrl(`/product/category/info/${data.catId}`),
         method: "get",
-      }).then(({data}) => {
+      }).then(({ data }) => {
         this.category.name = data.data.name;
         this.category.catId = data.data.catId;
         this.category.icon = data.data.icon;
@@ -183,8 +183,8 @@ export default {
       });
     },
     editCategory() {
-      const {catId, name, icon, productUnit} = this.category;
-      const data = {catId, name, icon, productUnit};
+      const { catId, name, icon, productUnit } = this.category;
+      const data = { catId, name, icon, productUnit };
       this.$http({
         url: this.$http.adornUrl("/product/category/update"),
         method: "post",
@@ -245,10 +245,23 @@ export default {
             catLevel: catLevel,
           });
         } else {
-          this.updateNodes.push({catId: siblings[i].data.catId, sort: i});
+          this.updateNodes.push({ catId: siblings[i].data.catId, sort: i });
         }
       }
-      console.log(this.updateNodes);
+      this.$http({
+        url: this.$http.adornUrl("/product/category/updateBatch"),
+        method: "post",
+        data: this.$http.adornData(this.updateNodes, false),
+      }).then(({ data }) => {
+        this.$message({
+          type: "success",
+          message: "菜单保存成功!",
+        });
+        this.getMenus();
+        this.expandedKey = [pCid];
+        this.updateNodes = [];
+        this.maxLevel = 0;
+      });
     },
     updateChildNodesLevel(node) {
       if (node.childNodes.length === 0) return;
