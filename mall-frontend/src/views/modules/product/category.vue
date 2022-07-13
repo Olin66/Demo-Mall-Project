@@ -9,6 +9,7 @@
       :default-expanded-keys="expandedKey"
       :draggable="true"
       :allow-drop="allowDrop"
+      @node-drop="handleDrop"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
@@ -67,6 +68,7 @@
 export default {
   data() {
     return {
+      updateNodes: [],
       maxLevel: 0,
       menus: [],
       expandedKey: [],
@@ -95,7 +97,7 @@ export default {
       this.$http({
         url: this.$http.adornUrl("/product/category/list/tree"),
         method: "get",
-      }).then(({ data }) => {
+      }).then(({data}) => {
         this.menus = data.data;
       });
     },
@@ -153,7 +155,7 @@ export default {
       this.$http({
         url: this.$http.adornUrl(`/product/category/info/${data.catId}`),
         method: "get",
-      }).then(({ data }) => {
+      }).then(({data}) => {
         this.category.name = data.data.name;
         this.category.catId = data.data.catId;
         this.category.icon = data.data.icon;
@@ -181,8 +183,8 @@ export default {
       });
     },
     editCategory() {
-      const { catId, name, icon, productUnit } = this.category;
-      const data = { catId, name, icon, productUnit };
+      const {catId, name, icon, productUnit} = this.category;
+      const data = {catId, name, icon, productUnit};
       this.$http({
         url: this.$http.adornUrl("/product/category/update"),
         method: "post",
@@ -214,6 +216,50 @@ export default {
           }
           this.countNodeLevel(node.children[i]);
         }
+      }
+    },
+    handleDrop(draggingNode, dropNode, dropType, ev) {
+      let pCid = 0;
+      let siblings = null;
+      if (dropType === "before" || dropType === "after") {
+        pCid =
+          dropNode.parent.data.catId === undefined
+            ? 0
+            : dropNode.parent.data.catId;
+        siblings = dropNode.parent.childNodes;
+      } else {
+        pCid = dropNode.data.catId;
+        siblings = dropNode.childNodes;
+      }
+      for (let i = 0; i < siblings.length; i++) {
+        if (siblings[i].data.catId === draggingNode.data.catId) {
+          let catLevel = draggingNode.level;
+          if (siblings[i].level !== draggingNode.level) {
+            catLevel = siblings[i].level;
+            this.updateChildNodesLevel(siblings[i]);
+          }
+          this.updateNodes.push({
+            catId: siblings[i].data.catId,
+            sort: i,
+            parentCid: pCid,
+            catLevel: catLevel,
+          });
+        } else {
+          this.updateNodes.push({catId: siblings[i].data.catId, sort: i});
+        }
+      }
+      console.log(this.updateNodes);
+    },
+    updateChildNodesLevel(node) {
+      if (node.childNodes.length === 0) return;
+      for (let i = 0; i < node.childNodes.length; i++) {
+        const cNode = node.childNodes[i].data;
+        this.updateNodes.push({
+          catId: cNode.catId,
+          catLevel: node.childNodes[i].level,
+        });
+        cNode.catLevel = node.childNodes[i].level;
+        this.updateChildNodesLevel(node.childNodes[i]);
       }
     },
   },
