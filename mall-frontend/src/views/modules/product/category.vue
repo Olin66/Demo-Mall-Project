@@ -7,6 +7,7 @@
     >
     </el-switch>
     <el-button v-if="draggable" @click="batchSave()">批量保存</el-button>
+    <el-button type="danger" @click="batchDelete()">批量删除</el-button>
     <el-tree
       :data="menus"
       :props="defaultProps"
@@ -17,6 +18,7 @@
       :draggable="draggable"
       :allow-drop="allowDrop"
       @node-drop="handleDrop"
+      ref="menuTree"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
@@ -145,10 +147,10 @@ export default {
           }).then(({}) => {
             this.getMenus();
             this.expandedKey = [node.parent.data.catId];
-          });
-          this.$message({
-            type: "success",
-            message: "菜单删除成功!",
+            this.$message({
+              type: "success",
+              message: "菜单删除成功!",
+            });
           });
         })
         .catch(() => {
@@ -287,6 +289,35 @@ export default {
         this.updateNodes = [];
         this.maxLevel = 0;
       });
+    },
+    batchDelete() {
+      let checkedNodes = this.$refs.menuTree
+        .getCheckedNodes()
+        .map((e) => e.catId);
+      this.$confirm(`是否删除${checkedNodes.length}个选中的菜单?`, "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.$http({
+            url: this.$http.adornUrl("/product/category/delete"),
+            method: "post",
+            data: this.$http.adornData(checkedNodes, false),
+          }).then(({}) => {
+            this.$message({
+              type: "success",
+              message: "菜单批量删除成功!",
+            });
+            this.getMenus();
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
     },
   },
   created() {
