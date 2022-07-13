@@ -7,6 +7,8 @@
       show-checkbox
       node-key="catId"
       :default-expanded-keys="expandedKey"
+      :draggable="true"
+      :allow-drop="allowDrop"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
@@ -65,6 +67,7 @@
 export default {
   data() {
     return {
+      maxLevel: 0,
       menus: [],
       expandedKey: [],
       dialogTitle: "",
@@ -92,7 +95,7 @@ export default {
       this.$http({
         url: this.$http.adornUrl("/product/category/list/tree"),
         method: "get",
-      }).then(({data}) => {
+      }).then(({ data }) => {
         this.menus = data.data;
       });
     },
@@ -150,7 +153,7 @@ export default {
       this.$http({
         url: this.$http.adornUrl(`/product/category/info/${data.catId}`),
         method: "get",
-      }).then(({data}) => {
+      }).then(({ data }) => {
         this.category.name = data.data.name;
         this.category.catId = data.data.catId;
         this.category.icon = data.data.icon;
@@ -178,8 +181,8 @@ export default {
       });
     },
     editCategory() {
-      const {catId, name, icon, productUnit} = this.category;
-      const data = {catId, name, icon, productUnit};
+      const { catId, name, icon, productUnit } = this.category;
+      const data = { catId, name, icon, productUnit };
       this.$http({
         url: this.$http.adornUrl("/product/category/update"),
         method: "post",
@@ -193,6 +196,25 @@ export default {
         this.getMenus();
         this.expandedKey = [this.category.parentCid];
       });
+    },
+    allowDrop(draggingNode, dropNode, type) {
+      this.countNodeLevel(draggingNode.data);
+      let deep = this.maxLevel - draggingNode.data.catLevel + 1;
+      if (type === "inner") {
+        return deep + dropNode.level <= 3;
+      } else {
+        return deep + dropNode.parent.level <= 3;
+      }
+    },
+    countNodeLevel(node) {
+      if (node.children != null && node.children.length > 0) {
+        for (let i = 0; i < node.children.length; i++) {
+          if (node.children[i].catLevel > this.maxLevel) {
+            this.maxLevel = node.children[i].catLevel;
+          }
+          this.countNodeLevel(node.children[i]);
+        }
+      }
     },
   },
   created() {
