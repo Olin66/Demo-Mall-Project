@@ -1,9 +1,6 @@
 package com.mall.product;
 
-import com.aliyun.oss.ClientException;
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClientBuilder;
-import com.aliyun.oss.OSSException;
+import com.aliyun.oss.*;
 import com.mall.product.entity.BrandEntity;
 import com.mall.product.service.BrandService;
 import org.junit.jupiter.api.Test;
@@ -19,6 +16,9 @@ class MallProductApplicationTests {
 
     @Autowired
     BrandService brandService;
+
+    @Autowired
+    OSS ossClient;
 
     @Test
     void test1(){
@@ -68,6 +68,14 @@ class MallProductApplicationTests {
                 ossClient.shutdown();
             }
         }
+    }
+
+    @Test
+    void test3() throws FileNotFoundException {
+        InputStream inputStream = new FileInputStream("D:\\BaiduNetdiskDownload\\gmall\\Doc\\API网关.jpg");
+        String bucketName = "snowcharm";
+        String objectName = "gateway.png";
+        ossClient.putObject(bucketName, objectName, inputStream);
     }
 
 }
