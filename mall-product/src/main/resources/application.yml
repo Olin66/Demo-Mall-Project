@@ -23,9 +23,3 @@ logging:
   level:
     com.mall.product.dao: debug
 
-alibaba:
-  cloud:
-    access-key: LTAI5tA5FMZTiFuyEkxCxp4S
-    secret-key: CG7I4xD2VUwaGP1kzGaQQVrq8VtXVM
-    oss:
-      endpoint: oss-cn-shenzhen.aliyuncs.com
