@@ -15,7 +15,7 @@
         <el-input v-model="dataForm.name" placeholder="品牌名"></el-input>
       </el-form-item>
       <el-form-item label="品牌logo地址" prop="logo">
-        <el-input v-model="dataForm.logo" placeholder="品牌logo地址"></el-input>
+        <SingleUpload v-model="dataForm.logo"></SingleUpload>
       </el-form-item>
       <el-form-item label="介绍" prop="descript">
         <el-input v-model="dataForm.descript" placeholder="介绍"></el-input>
@@ -25,6 +25,8 @@
           v-model="dataForm.showStatus"
           active-color="#13ce66"
           inactive-color="#ff4949"
+          :active-value="1"
+          :inactive-value="0"
         >
         </el-switch
       ></el-form-item>
@@ -46,6 +48,7 @@
 </template>
 
 <script>
+import SingleUpload from "../../../components/upload/singleUpload.vue";
 export default {
   data() {
     return {
@@ -144,5 +147,6 @@ export default {
       });
     },
   },
+  components: { SingleUpload },
 };
 </script>
