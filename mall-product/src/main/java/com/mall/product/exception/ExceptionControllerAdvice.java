@@ -1,4 +1,4 @@
-package com.mall.product.service;
+package com.mall.product.exception;
 
 import com.mall.common.exception.ExceptionCodeEnum;
 import com.mall.common.utils.R;
