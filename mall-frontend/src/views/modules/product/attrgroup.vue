@@ -162,7 +162,7 @@ export default {
   },
   methods: {
     treeNodeClick(data, node, component) {
-        if (data.children.length === 0){
+        if (!data.children){
             this.catId = data.catId;
             this.getDataList();
         }

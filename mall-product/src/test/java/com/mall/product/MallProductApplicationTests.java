@@ -3,6 +3,7 @@ package com.mall.product;
 //import com.aliyun.oss.*;
 import com.mall.product.entity.BrandEntity;
 import com.mall.product.service.BrandService;
+import com.mall.product.service.CategoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,9 +11,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 @SpringBootTest
 class MallProductApplicationTests {
+
+    @Autowired
+    CategoryService categoryService;
+
+    @Test
+    public void test(){
+        Long[] path = categoryService.getCatelogPath(225L);
+        System.out.println(Arrays.toString(path));
+    }
 
 //    @Autowired
 //    BrandService brandService;

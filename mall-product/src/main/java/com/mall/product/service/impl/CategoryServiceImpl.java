@@ -2,10 +2,7 @@ package com.mall.product.service.impl;
 
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -41,6 +38,21 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                 .peek(menu -> menu.setChildren(getChildren(menu, entities)))
                 .sorted(Comparator.comparingInt(m -> (m.getSort() == null ? 0 : m.getSort())))
                 .toList();
+    }
+
+    @Override
+    public Long[] getCatelogPath(Long catelogId) {
+        List<Long> path = new ArrayList<>();
+        getParentPath(path, catelogId);
+        return path.toArray(new Long[0]);
+    }
+
+    private void getParentPath(List<Long> list, Long catelogId){
+        CategoryEntity category = this.getById(catelogId);
+        if (category.getParentCid() != 0){
+            getParentPath(list, category.getParentCid());
+        }
+        list.add(catelogId);
     }
 
     private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all) {
