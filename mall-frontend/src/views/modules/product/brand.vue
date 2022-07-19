@@ -162,7 +162,7 @@ export default {
     },
     getCateRelation() {
       this.$http({
-        url: this.$http.adornUrl("/product/categorybrandrelation/catelog/list"),
+        url: this.$http.adornUrl("/product/categorybrandrelation/catelogList"),
         method: "get",
         params: this.$http.adornParams({
           brandId: this.brandId
@@ -194,7 +194,7 @@ export default {
       });
     },
     updateBrandStatus(data) {
-      console.log("最新信息", data);
+      // console.log("最新信息", data);
       let { brandId, showStatus } = data;
       //发送请求修改状态
       this.$http({
