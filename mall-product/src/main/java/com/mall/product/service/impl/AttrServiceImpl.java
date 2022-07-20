@@ -9,6 +9,7 @@ import com.mall.product.entity.AttrAttrgroupRelationEntity;
 import com.mall.product.entity.AttrGroupEntity;
 import com.mall.product.entity.CategoryEntity;
 import com.mall.product.service.CategoryService;
+import com.mall.product.vo.AttrGroupRelationVo;
 import com.mall.product.vo.AttrRespVo;
 import com.mall.product.vo.AttrVo;
 import org.apache.commons.lang.StringUtils;
@@ -114,7 +115,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         AttrRespVo vo = new AttrRespVo();
         AttrEntity entity = this.getById(attrId);
         BeanUtils.copyProperties(entity, vo);
-        if (entity.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode()){
+        if (entity.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode()) {
             AttrAttrgroupRelationEntity relationEntity =
                     relationDao.selectOne(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrId));
             if (relationEntity != null) {
@@ -141,7 +142,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         AttrEntity attrEntity = new AttrEntity();
         BeanUtils.copyProperties(attr, attrEntity);
         this.updateById(attrEntity);
-        if (attrEntity.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode()){
+        if (attrEntity.getAttrType() == ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode()) {
             AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
             relationEntity.setAttrId(attr.getAttrId());
             relationEntity.setAttrGroupId(attr.getAttrGroupId());
@@ -154,6 +155,25 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                 relationDao.insert(relationEntity);
             }
         }
+    }
+
+    @Override
+    public List<AttrEntity> getRelationAttr(Long attrgroupId) {
+        List<AttrAttrgroupRelationEntity> entities = relationDao
+                .selectList(new QueryWrapper<AttrAttrgroupRelationEntity>()
+                        .eq("attr_group_id", attrgroupId));
+        List<Long> ids = entities.stream().map(AttrAttrgroupRelationEntity::getAttrId).toList();
+        return this.listByIds(ids);
+    }
+
+    @Override
+    public void deleteRelation(List<AttrGroupRelationVo> vos) {
+        List<AttrAttrgroupRelationEntity> entities = vos.stream().map(vo -> {
+            AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
+            BeanUtils.copyProperties(vo, relationEntity);
+            return relationEntity;
+        }).toList();
+        relationDao.deleteBatchRelations(entities);
     }
 
 }
