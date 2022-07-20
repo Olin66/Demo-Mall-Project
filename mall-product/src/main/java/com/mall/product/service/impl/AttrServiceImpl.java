@@ -17,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -163,6 +164,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                 .selectList(new QueryWrapper<AttrAttrgroupRelationEntity>()
                         .eq("attr_group_id", attrgroupId));
         List<Long> ids = entities.stream().map(AttrAttrgroupRelationEntity::getAttrId).toList();
+        if (ids.isEmpty()) return new ArrayList<>();
         return this.listByIds(ids);
     }
 
@@ -174,6 +176,33 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             return relationEntity;
         }).toList();
         relationDao.deleteBatchRelations(entities);
+    }
+
+    @Override
+    public PageUtils getNoRelationAttr(Map<String, Object> params, Long attrgroupId) {
+        AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrgroupId);
+        Long catelogId = attrGroupEntity.getCatelogId();
+        List<AttrGroupEntity> attrGroupEntities
+                = attrGroupDao.selectList(new QueryWrapper<AttrGroupEntity>()
+                .eq("catelog_id", catelogId));
+        List<Long> list = attrGroupEntities.stream().map(AttrGroupEntity::getAttrGroupId).toList();
+        List<AttrAttrgroupRelationEntity> groupId =
+                relationDao.selectList(new QueryWrapper<AttrAttrgroupRelationEntity>()
+                        .in("attr_group_id", list));
+        List<Long> attrIds = groupId.stream().map(AttrAttrgroupRelationEntity::getAttrId).toList();
+        QueryWrapper<AttrEntity> wrapper
+                = new QueryWrapper<AttrEntity>()
+                .eq("catelog_id", catelogId)
+                .eq("attr_type", ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode());
+        if (!attrIds.isEmpty()) {
+            wrapper.notIn("attr_id", attrIds);
+        }
+        String key = (String) params.get("key");
+        if (!StringUtils.isEmpty(key)) {
+            wrapper.and(w -> w.eq("attr_id", key).or().like("attr_name", key));
+        }
+        IPage<AttrEntity> page = this.page(new Query<AttrEntity>().getPage(params), wrapper);
+        return new PageUtils(page);
     }
 
 }
