@@ -1,5 +1,8 @@
 package com.mall.product.vo;
 
+import com.mall.product.pojo.BaseAttrs;
+import com.mall.product.pojo.Bounds;
+import com.mall.product.pojo.Skus;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -18,55 +21,4 @@ public class SpuSaveVo {
     private Bounds bounds;
     private List<BaseAttrs> baseAttrs;
     private List<Skus> skus;
-}
-
-@Data
-class Bounds{
-    private BigDecimal buyBounds;
-    private BigDecimal growBounds;
-}
-
-@Data
-class BaseAttrs{
-    private Long attrId;
-    private String attrValues;
-    private int showDesc;
-}
-
-@Data
-class Skus{
-    private List<Attr> attr;
-    private String skuName;
-    private BigDecimal price;
-    private String skuTitle;
-    private String skuSubtitle;
-    private List<Images> images;
-    private List<String> descar;
-    private int fullCount;
-    private BigDecimal discount;
-    private int countStatus;
-    private BigDecimal fullPrice;
-    private BigDecimal reducePrice;
-    private int priceStatus;
-    private List<MemberPrice> memberPrice;
-}
-
-@Data
-class Attr{
-    private Long attrId;
-    private String attrName;
-    private String attrValue;
-}
-
-@Data
-class Images{
-    private String imgUrl;
-    private int defaultImg;
-}
-
-@Data
-class MemberPrice{
-    private Long id;
-    private String name;
-    private BigDecimal price;
 }
