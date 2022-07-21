@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.mall.product.entity.BrandEntity;
+import com.mall.product.vo.BrandVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +30,19 @@ public class CategoryBrandRelationController {
     @Autowired
     private CategoryBrandRelationService categoryBrandRelationService;
 
-    @GetMapping("/catelogList")
+    @GetMapping("/brands/list")
+    public R relationBrandList(@RequestParam(value="catId") Long catId){
+        List<BrandEntity> entities = categoryBrandRelationService.getBrandsByCatId(catId);
+        List<BrandVo> brandVos = entities.stream().map(entity -> {
+            BrandVo vo = new BrandVo();
+            vo.setBandId(entity.getBrandId());
+            vo.setBrandName(entity.getName());
+            return vo;
+        }).toList();
+        return R.ok().put("data", brandVos);
+    }
+
+    @GetMapping("/catelog/list")
     public R catelogList(@RequestParam("brandId") Long brandId) {
         List<CategoryBrandRelationEntity> data = categoryBrandRelationService
                 .list(new QueryWrapper<CategoryBrandRelationEntity>().eq("brand_id", brandId));
