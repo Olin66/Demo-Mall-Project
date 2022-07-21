@@ -1,3 +1,4 @@
 *.xml linguist-language=java
 *.yml linguist-language=java
 *.properties linguist-language=java
+*.sql linguist-language=PLpgSQL
