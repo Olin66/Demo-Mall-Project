@@ -2,16 +2,17 @@
   <div>
     <el-select placeholder="请选择" v-model="brandId" filterable clearable>
       <el-option
-        v-for="item in brands"
+        v-for="item in this.brands"
         :key="item.brandId"
         :label="item.brandName"
-        :value="item.brandId"
+        :value="item.brandName"
       ></el-option>
     </el-select>
   </div>
 </template>
 
 <script>
+import PubSub from "pubsub-js"
 //这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
 //例如：import 《组件名称》 from '《组件路径》';
 
@@ -25,8 +26,8 @@ export default {
       catId: 0,
       brands: [
         {
-          label: "a",
-          value: 1
+          label: "",
+          value: 0
         }
       ],
       brandId: "",
@@ -38,7 +39,7 @@ export default {
   //监控data中的数据变化
   watch: {
     brandId(val) {
-      this.PubSub.publish("brandId", val);
+      PubSub.publish("brandId", val);
     }
   },
   //方法集合
@@ -76,5 +77,5 @@ export default {
   activated() {} //如果页面有keep-alive缓存功能，这个函数会触发
 };
 </script>
-<style scoped>
+<style scoped>
 </style>
