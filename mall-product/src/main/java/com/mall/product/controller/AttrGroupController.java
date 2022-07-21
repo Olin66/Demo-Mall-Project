@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.mall.product.entity.AttrEntity;
+import com.mall.product.service.AttrAttrgroupRelationService;
 import com.mall.product.service.AttrService;
 import com.mall.product.service.CategoryService;
 import com.mall.product.vo.AttrGroupRelationVo;
@@ -36,6 +37,9 @@ public class AttrGroupController {
     @Autowired
     private AttrService attrService;
 
+    @Autowired
+    private AttrAttrgroupRelationService attrAttrgroupRelationService;
+
     @GetMapping("/{attrgroupId}/attr/relation")
     public R attrRelation(@PathVariable("attrgroupId") Long attrgroupId) {
         List<AttrEntity> list = attrService.getRelationAttr(attrgroupId);
@@ -46,6 +50,12 @@ public class AttrGroupController {
     public R attrNoRelation(@PathVariable("attrgroupId") Long attrgroupId, @RequestParam Map<String, Object> params){
         PageUtils page = attrService.getNoRelationAttr(params, attrgroupId);
         return R.ok().put("page", page);
+    }
+
+    @PostMapping("/attr/relation")
+    public R addRelation(@RequestBody List<AttrGroupRelationVo> vos){
+        attrAttrgroupRelationService.saveBatch(vos);
+        return R.ok();
     }
 
     @PostMapping("/attr/relation/delete")
