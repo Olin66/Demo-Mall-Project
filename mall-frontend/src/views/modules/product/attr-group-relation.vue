@@ -135,7 +135,7 @@ export default {
         method: "post",
         data: this.$http.adornData(postData, false)
       }).then(({ data }) => {
-        if (data.code == 0) {
+        if (data.code === 0) {
           this.$message({ type: "success", message: "删除成功" });
           this.init(this.attrGroupId);
         } else {
@@ -152,7 +152,7 @@ export default {
         method: "post",
         data: this.$http.adornData(data, false)
       }).then(({ data }) => {
-        if (data.code == 0) {
+        if (data.code === 0) {
           this.$message({ type: "success", message: "删除成功" });
           this.init(this.attrGroupId);
         } else {
@@ -163,7 +163,7 @@ export default {
     submitAddRealtion() {
       this.innerVisible = false;
       //准备数据
-      console.log("准备新增的数据", this.innerdataListSelections);
+      // console.log("准备新增的数据", this.innerdataListSelections);
       if (this.innerdataListSelections.length > 0) {
         let postData = [];
         this.innerdataListSelections.forEach(item => {
@@ -174,7 +174,7 @@ export default {
           method: "post",
           data: this.$http.adornData(postData, false)
         }).then(({ data }) => {
-          if (data.code == 0) {
+          if (data.code === 0) {
             this.$message({ type: "success", message: "新增关联成功" });
           }
           this.$emit("refreshData");
