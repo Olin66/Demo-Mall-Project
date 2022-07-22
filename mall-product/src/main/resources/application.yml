@@ -1,25 +1,26 @@
-spring:
-  datasource:
-    username: root
-    password: root
-    url: jdbc:mysql://192.168.56.10:3306/mall_pms
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  cloud:
-    nacos:
-      server-addr: 127.0.0.1:8848
-  application:
-    name: mall-product
-
-mybatis-plus:
-  mapper-locations: classpath:/mapper/**/*.xml
-  global-config:
-    db-config:
-      id-type: auto
-
-server:
-  port: 11000
-
-logging:
-  level:
-    com.mall: debug
-
+#spring:
+#  datasource:
+#    username: root
+#    password: root
+#    url: jdbc:mysql://192.168.56.10:3306/mall_pms
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#  cloud:
+#    nacos:
+#      server-addr: 127.0.0.1:8848
+#  application:
+#    name: mall-product
+#  jackson:
+#    date-format: yyyy-MM-dd HH:mm:ss
+#
+#mybatis-plus:
+#  mapper-locations: classpath:/mapper/**/*.xml
+#  global-config:
+#    db-config:
+#      id-type: auto
+#
+#server:
+#  port: 11000
+#
+#logging:
+#  level:
+#    com.mall: debug
