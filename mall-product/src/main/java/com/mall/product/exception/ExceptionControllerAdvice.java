@@ -26,6 +26,7 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler(value = Throwable.class)
     public R handleException(Throwable e) {
+        e.printStackTrace();
         return R.error(ExceptionCodeEnum.UNKNOWN_EXCEPTION.getCode(), ExceptionCodeEnum.UNKNOWN_EXCEPTION.getMessage());
     }
 }

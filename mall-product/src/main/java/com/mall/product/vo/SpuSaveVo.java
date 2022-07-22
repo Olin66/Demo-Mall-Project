@@ -1,8 +1,8 @@
 package com.mall.product.vo;
 
-import com.mall.product.pojo.BaseAttrs;
-import com.mall.product.pojo.Bounds;
-import com.mall.product.pojo.Skus;
+import com.mall.product.vo.pojo.BaseAttrs;
+import com.mall.product.vo.pojo.Bounds;
+import com.mall.product.vo.pojo.Skus;
 import lombok.Data;
 
 import java.math.BigDecimal;
