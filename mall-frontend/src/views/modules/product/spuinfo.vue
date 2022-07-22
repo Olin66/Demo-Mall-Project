@@ -16,9 +16,9 @@
       <el-table-column prop="weight" header-align="center" align="center" label="重量"></el-table-column>
       <el-table-column prop="publishStatus" header-align="center" align="center" label="上架状态">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.publishStatus == 0">新建</el-tag>
-          <el-tag v-if="scope.row.publishStatus == 1">已上架</el-tag>
-          <el-tag v-if="scope.row.publishStatus == 2">已下架</el-tag>
+          <el-tag v-if="scope.row.publishStatus === 0">新建</el-tag>
+          <el-tag v-if="scope.row.publishStatus === 1">已上架</el-tag>
+          <el-tag v-if="scope.row.publishStatus === 2">已下架</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="createTime" header-align="center" align="center" label="创建时间"></el-table-column>
@@ -30,7 +30,8 @@
             type="text"
             size="small"
             @click="productUp(scope.row.id)"
-          >上架</el-button>
+          >上架
+          </el-button>
           <el-button type="text" size="small" @click="attrUpdateShow(scope.row)">规格</el-button>
         </template>
       </el-table-column>
@@ -78,7 +79,7 @@ export default {
       this.$http({
         url: this.$http.adornUrl("/product/spuinfo/" + id + "/up"),
         method: "post"
-      }).then(({ data }) => {
+      }).then(({data}) => {
         if (data && data.code === 0) {
           this.$message({
             message: "操作成功",
@@ -94,10 +95,10 @@ export default {
       });
     },
     attrUpdateShow(row) {
-      // console.log(row);
+      console.log(row);
       this.$router.push({
         path: "/product-attrupdate",
-        query: { spuId: row.id, catalogId: row.catalogId }
+        query: {spuId: row.id, catalogId: row.catalogId}
       });
     },
     // 获取数据列表
@@ -112,7 +113,7 @@ export default {
         url: this.$http.adornUrl("/product/spuinfo/list"),
         method: "get",
         params: this.$http.adornParams(param)
-      }).then(({ data }) => {
+      }).then(({data}) => {
         if (data && data.code === 0) {
           this.dataList = data.page.list;
           this.totalPage = data.page.totalCount;
@@ -139,11 +140,12 @@ export default {
       this.dataListSelections = val;
     },
     // 新增 / 修改
-    addOrUpdateHandle(id) {}
+    addOrUpdateHandle(id) {
+    }
   },
   mounted() {
     this.dataSub = PubSub.subscribe("dataForm", (msg, val) => {
-      // console.log("~~~~~", val);
+      console.log("~~~~~", val);
       this.dataForm = val;
       this.getDataList();
     });
