@@ -446,7 +446,7 @@ export default {
       });
 
       this.spu.images = imgArr; //去重
-      console.log("this.spu.skus", this.spu.skus);
+      // console.log("this.spu.skus", this.spu.skus);
     }
   },
   //方法集合
@@ -489,16 +489,16 @@ export default {
           this.dataResp.memberLevels = data.page.list;
         })
         .catch(e => {
-          console.log(e);
+          // console.log(e);
         });
     },
     showInput(idx) {
-      console.log("``````", this.view);
+      // console.log("``````", this.view);
       this.inputVisible[idx].view = true;
       // this.$refs['saveTagInput'+idx].$refs.input.focus();
     },
     checkDefaultImg(row, index, img) {
-      console.log("默认图片", row, index);
+      // console.log("默认图片", row, index);
       //这个图片被选中了，
       row.images[index].imgUrl = img; //默认选中
       row.images[index].defaultImg = 1; //修改标志位;
@@ -549,7 +549,7 @@ export default {
           }
         });
       });
-      console.log("baseAttrs", this.spu.baseAttrs);
+      // console.log("baseAttrs", this.spu.baseAttrs);
       this.step = 2;
       this.getShowSaleAttr();
     },
@@ -570,7 +570,7 @@ export default {
       //[["黑色","6GB","移动"],["黑色","6GB","联通"],["黑色","8GB","移动"],["黑色","8GB","联通"],
       //["白色","6GB","移动"],["白色","6GB","联通"],["白色","8GB","移动"],["白色","8GB","联通"],
       //["蓝色","6GB","移动"],["蓝色","6GB","联通"],["蓝色","8GB","移动"],["蓝色","8GB","联通"]]
-      console.log("生成的组合", JSON.stringify(descartes));
+      // console.log("生成的组合", JSON.stringify(descartes));
       //有多少descartes就有多少sku
       let skus = [];
 
@@ -595,7 +595,7 @@ export default {
         let memberPrices = [];
         if (this.dataResp.memberLevels.length > 0) {
           for (let i = 0; i < this.dataResp.memberLevels.length; i++) {
-            if (this.dataResp.memberLevels[i].priviledgeMemberPrice == 1) {
+            if (this.dataResp.memberLevels[i].priviledgeMemberPrice === 1) {
               memberPrices.push({
                 id: this.dataResp.memberLevels[i].id,
                 name: this.dataResp.memberLevels[i].name,
@@ -621,14 +621,14 @@ export default {
             fullPrice: 0.0,
             reducePrice: 0.0,
             priceStatus: 0,
-            memberPrice: new Array().concat(memberPrices)
+            memberPrice: [].concat(memberPrices)
           });
         } else {
           skus.push(res);
         }
       });
       this.spu.skus = skus;
-      console.log("结果!!!", this.spu.skus, this.dataResp.tableAttrColumn);
+      // console.log("结果!!!", this.spu.skus, this.dataResp.tableAttrColumn);
     },
     //判断如果包含之前的sku的descar组合，就返回这个sku的详细信息；
     hasAndReturnSku(skus, descar) {
@@ -697,7 +697,7 @@ export default {
     },
 
     submitSkus() {
-      console.log("~~~~~", JSON.stringify(this.spu));
+      // console.log("~~~~~", JSON.stringify(this.spu));
       this.$confirm("将要提交商品数据，需要一小段时间，是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -716,7 +716,7 @@ export default {
               });
               this.step = 4;
             } else {
-              console.log(data);
+              // console.log(data);
               this.$message({
                 type: "error",
                 message: "保存失败，原因【" + data.msg + "】"
@@ -725,7 +725,7 @@ export default {
           });
         })
         .catch(e => {
-          console.log(e);
+          // console.log(e);
           this.$message({
             type: "info",
             message: "已取消"
