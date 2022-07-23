@@ -127,11 +127,11 @@ export default {
   methods: {
     getSkuDetails(row, expand) {
       //sku详情查询
-      console.log("展开某行...", row, expand);
+      // console.log("展开某行...", row, expand);
     },
     //处理更多指令
     handleCommand(row, command) {
-      console.log("~~~~~", row, command);
+      // console.log("~~~~~", row, command);
       if ("stockSettings" === command) {
         this.$router.push({ path: "/ware-sku", query: { skuId: row.skuId } });
       }
@@ -192,6 +192,6 @@ export default {
   beforeDestroy() {
     PubSub.unsubscribe(this.catPathSub);
     PubSub.unsubscribe(this.brandIdSub);
-  } //生命周期 - 销毁之前
+  }
 };
 </script>
