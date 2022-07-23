@@ -100,8 +100,8 @@ export default {
       brandIdSub: null,
       dataForm: {
         key: "",
-        brandId: 0,
-        catelogId: 0,
+        brandId: "",
+        catelogId: "",
         price: {
           min: 0,
           max: 0
@@ -132,7 +132,7 @@ export default {
     //处理更多指令
     handleCommand(row, command) {
       console.log("~~~~~", row, command);
-      if ("stockSettings" == command) {
+      if ("stockSettings" === command) {
         this.$router.push({ path: "/ware-sku", query: { skuId: row.skuId } });
       }
     },
