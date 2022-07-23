@@ -63,6 +63,14 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
             this.save(purchaseEntity);
         }
         List<Long> items = mergeVo.getItems();
+        List<PurchaseDetailEntity> entities = purchaseDetailService.listByIds(items);
+
+        entities.forEach((item) -> {
+            if (!item.getStatus().equals(WareConstant.PurchaseDetailEnum.CREATED.getCode())
+                    && !item.getStatus().equals(WareConstant.PurchaseDetailEnum.ASSIGNED.getCode())) {
+                throw new IllegalArgumentException("正在采购，无法进行分配");
+            }
+        });
         List<PurchaseDetailEntity> list = items.stream().map(item -> {
             PurchaseDetailEntity purchaseDetailEntity = new PurchaseDetailEntity();
             purchaseDetailEntity.setId(item);
@@ -75,6 +83,25 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
         purchaseEntity.setId(purchaseId);
         purchaseEntity.setUpdateTime(new Date());
         this.updateById(purchaseEntity);
+    }
+
+    @Override
+    @Transactional
+    public void receive(List<Long> ids) {
+        List<PurchaseEntity> list = ids.stream().map(this::getById).filter(item ->
+                        item.getStatus() == WareConstant.PurchaseStatusEnum.CREATED.getCode() ||
+                                item.getStatus() == WareConstant.PurchaseStatusEnum.ASSIGNED.getCode())
+                .peek(item -> {
+                    item.setStatus(WareConstant.PurchaseStatusEnum.RECEIVED.getCode());
+                    item.setUpdateTime(new Date());
+                })
+                .toList();
+        this.updateBatchById(list);
+        list.forEach(item -> {
+            List<PurchaseDetailEntity> entities = purchaseDetailService.listDetailByPurchaseId(item.getId());
+            entities.forEach(entity -> entity.setStatus(WareConstant.PurchaseDetailEnum.PURCHASING.getCode()));
+            purchaseDetailService.updateBatchById(entities);
+        });
     }
 
 }

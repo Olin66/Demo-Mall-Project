@@ -2,6 +2,7 @@ package com.mall.ware.controller;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import com.mall.ware.vo.MergeVo;
@@ -34,10 +35,15 @@ public class PurchaseController {
         return R.ok();
     }
 
+    @PostMapping("/receive")
+    public R receive(@RequestBody List<Long> ids){
+        purchaseService.receive(ids);
+        return R.ok();
+    }
+
     @RequestMapping("/unreceive/list")
     public R unreceiveList(@RequestParam Map<String, Object> params){
         PageUtils page = purchaseService.queryPageUnreceive(params);
-
         return R.ok().put("page", page);
     }
 
