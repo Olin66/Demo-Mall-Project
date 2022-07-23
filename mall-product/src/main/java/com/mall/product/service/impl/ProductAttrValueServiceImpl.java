@@ -13,6 +13,7 @@ import com.mall.common.utils.Query;
 import com.mall.product.dao.ProductAttrValueDao;
 import com.mall.product.entity.ProductAttrValueEntity;
 import com.mall.product.service.ProductAttrValueService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("productAttrValueService")
@@ -30,6 +31,20 @@ public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao
 
     @Override
     public void saveProductAttr(List<ProductAttrValueEntity> productAttrValueEntities) {
+        this.saveBatch(productAttrValueEntities);
+    }
+
+    @Override
+    public List<ProductAttrValueEntity> baseAttrListForSpu(Long spuId) {
+        return this.baseMapper.selectList(new QueryWrapper<ProductAttrValueEntity>().eq("spu_id", spuId));
+    }
+
+    @Override
+    @Transactional
+    public void updateSpuAttr(Long spuId, List<ProductAttrValueEntity> list) {
+        this.baseMapper.delete(new QueryWrapper<ProductAttrValueEntity>().eq("spu_id", spuId));
+        List<ProductAttrValueEntity> productAttrValueEntities
+                = list.stream().peek(item -> item.setSpuId(spuId)).toList();
         this.saveBatch(productAttrValueEntities);
     }
 

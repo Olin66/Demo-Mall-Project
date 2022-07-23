@@ -5,9 +5,7 @@ import com.mall.common.constant.ProductConstant;
 import com.mall.product.dao.AttrAttrgroupRelationDao;
 import com.mall.product.dao.AttrGroupDao;
 import com.mall.product.dao.CategoryDao;
-import com.mall.product.entity.AttrAttrgroupRelationEntity;
-import com.mall.product.entity.AttrGroupEntity;
-import com.mall.product.entity.CategoryEntity;
+import com.mall.product.entity.*;
 import com.mall.product.service.CategoryService;
 import com.mall.product.vo.AttrGroupRelationVo;
 import com.mall.product.vo.AttrRespVo;
@@ -28,7 +26,6 @@ import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.Query;
 
 import com.mall.product.dao.AttrDao;
-import com.mall.product.entity.AttrEntity;
 import com.mall.product.service.AttrService;
 import org.springframework.transaction.annotation.Transactional;
 

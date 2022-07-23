@@ -64,7 +64,6 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
             }catch (Exception e){
                 log.error("{}", e);
             }
-            wrapper.le("price", max);
         }
 
         IPage<SkuInfoEntity> page = this.page(

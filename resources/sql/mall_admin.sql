@@ -189,7 +189,7 @@ INSERT INTO `schedule_job` (`bean_name`, `params`, `cron_expression`, `status`, 
 -- 账号：13612345678  密码：admin
 INSERT INTO `tb_user` (`username`, `mobile`, `password`, `create_time`) VALUES ('mark', '13612345678', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', '2017-03-23 22:37:41');
 
-
+INSERT INTO sys_menu (menu_id, parent_id, name, url, perms, type, icon, order_num) VALUES (76, 37, '规格维护', 'product/attrupdate', '', 1, 'log', 0);
 
 
 

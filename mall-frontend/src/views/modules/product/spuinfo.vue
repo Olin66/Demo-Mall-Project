@@ -26,7 +26,7 @@
       <el-table-column fixed="right" header-align="center" align="center" width="150" label="操作">
         <template slot-scope="scope">
           <el-button
-            v-if="scope.row.publishStatus == 0"
+            v-if="scope.row.publishStatus === 0"
             type="text"
             size="small"
             @click="productUp(scope.row.id)"
@@ -95,7 +95,7 @@ export default {
       });
     },
     attrUpdateShow(row) {
-      console.log(row);
+      // console.log(row);
       this.$router.push({
         path: "/product-attrupdate",
         query: {spuId: row.id, catalogId: row.catalogId}
@@ -145,7 +145,7 @@ export default {
   },
   mounted() {
     this.dataSub = PubSub.subscribe("dataForm", (msg, val) => {
-      console.log("~~~~~", val);
+      // console.log("~~~~~", val);
       this.dataForm = val;
       this.getDataList();
     });
