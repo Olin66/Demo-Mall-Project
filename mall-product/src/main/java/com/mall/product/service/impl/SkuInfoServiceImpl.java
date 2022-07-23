@@ -1,6 +1,5 @@
 package com.mall.product.service.impl;
 
-import com.mall.product.entity.SpuInfoEntity;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
