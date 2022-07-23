@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.mall.ware.vo.MergeVo;
+import com.mall.ware.vo.PurchaseFinishVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +39,12 @@ public class PurchaseController {
     @PostMapping("/receive")
     public R receive(@RequestBody List<Long> ids){
         purchaseService.receive(ids);
+        return R.ok();
+    }
+
+    @PostMapping("/finish")
+    public R finish(@RequestBody PurchaseFinishVo purchaseFinishVo){
+        purchaseService.finish(purchaseFinishVo);
         return R.ok();
     }
 
