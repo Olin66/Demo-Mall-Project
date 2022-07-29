@@ -2,7 +2,6 @@ package com.mall.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.mall.common.utils.PageUtils;
-import com.mall.product.entity.SpuInfoDescEntity;
 import com.mall.product.entity.SpuInfoEntity;
 import com.mall.product.vo.SpuSaveVo;
 
@@ -24,5 +23,7 @@ public interface SpuInfoService extends IService<SpuInfoEntity> {
     void saveBaseSpuInfo(SpuInfoEntity spuInfoEntity);
 
     PageUtils queryPageByCondition(Map<String, Object> params);
+
+    void up(Long spuId);
 }
 

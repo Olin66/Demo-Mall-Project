@@ -1,24 +1,23 @@
 package com.mall.ware.service.impl;
 
-import com.mall.common.utils.R;
-import com.mall.ware.feign.ProductFeignService;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mall.common.to.SkuHasStockVo;
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.Query;
-
+import com.mall.common.utils.R;
 import com.mall.ware.dao.WareSkuDao;
 import com.mall.ware.entity.WareSkuEntity;
+import com.mall.ware.feign.ProductFeignService;
 import com.mall.ware.service.WareSkuService;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
 
 
 @Service("wareSkuService")
@@ -51,7 +50,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
     public void addStack(Long skuId, Long wareId, Integer skuNum) {
         List<WareSkuEntity> wareSkuEntities = this.baseMapper.selectList(new QueryWrapper<WareSkuEntity>()
                 .eq("sku_id", skuId).eq("ware_id", wareId));
-        if (wareSkuEntities==null||wareSkuEntities.isEmpty()){
+        if (wareSkuEntities == null || wareSkuEntities.isEmpty()) {
             WareSkuEntity wareSkuEntity = new WareSkuEntity();
             wareSkuEntity.setSkuId(skuId);
             wareSkuEntity.setWareId(wareId);
@@ -64,11 +63,22 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                     String skuName = (String) data.get("skuName");
                     wareSkuEntity.setSkuName(skuName);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("{}", e);
             }
             this.baseMapper.insert(wareSkuEntity);
-        }else this.baseMapper.addStack(skuId, wareId, skuNum);
+        } else this.baseMapper.addStack(skuId, wareId, skuNum);
+    }
+
+    @Override
+    public List<SkuHasStockVo> getSkuHasStock(List<Long> skuIds) {
+        return skuIds.stream().map(sku -> {
+            SkuHasStockVo vo = new SkuHasStockVo();
+            long count = baseMapper.getSkuStock(sku);
+            vo.setSkuId(sku);
+            vo.setHasStock(count > 0);
+            return vo;
+        }).toList();
     }
 
 }

@@ -1,36 +1,40 @@
 package com.mall.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mall.common.to.SkuHasStockVo;
 import com.mall.common.to.SkuReductionTo;
 import com.mall.common.to.SpuBoundsTo;
+import com.mall.common.to.es.SkuEsModel;
+import com.mall.common.to.pojo.Attrs;
+import com.mall.common.utils.PageUtils;
+import com.mall.common.utils.Query;
 import com.mall.common.utils.R;
+import com.mall.product.dao.SpuInfoDao;
 import com.mall.product.entity.*;
 import com.mall.product.feign.CouponFeignService;
+import com.mall.product.feign.WareFeignService;
 import com.mall.product.service.*;
 import com.mall.product.vo.SpuSaveVo;
 import com.mall.product.vo.pojo.*;
 import org.apache.commons.lang.StringUtils;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.mall.common.utils.PageUtils;
-import com.mall.common.utils.Query;
-
-import com.mall.product.dao.SpuInfoDao;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service("spuInfoService")
 public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> implements SpuInfoService {
+    @Autowired
+    BrandService brandService;
+    @Autowired
+    CategoryService categoryService;
     @Autowired
     SpuInfoDescService spuInfoDescService;
     @Autowired
@@ -47,6 +51,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     SkuSaleAttrValueService skuSaleAttrValueService;
     @Autowired
     CouponFeignService couponFeignService;
+    @Autowired
+    WareFeignService wareFeignService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -169,4 +175,43 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         return new PageUtils(page);
     }
 
+    @Override
+    public void up(Long spuId) {
+        List<SkuInfoEntity> skuInfoEntities = skuInfoService.getSkusById(spuId);
+        List<Long> skuIdList = skuInfoEntities.stream().map(SkuInfoEntity::getSkuId).toList();
+        List<ProductAttrValueEntity> baseAttrs = productAttrValueService.baseAttrListForSpu(spuId);
+        List<Long> attrIds = baseAttrs.stream().map(ProductAttrValueEntity::getAttrId).toList();
+        List<Long> searchAttrIds = attrService.selectSearchAttrs(attrIds);
+        Set<Long> idSet = new HashSet<>(searchAttrIds);
+        List<Attrs> list = baseAttrs.stream().filter(item -> idSet.contains(item.getAttrId()))
+                .map(item -> {
+                    Attrs attrs = new Attrs();
+                    BeanUtils.copyProperties(item, attrs);
+                    return attrs;
+                }).toList();
+        Map<Long, Boolean> map = null;
+        try {
+            R r = wareFeignService.getSkusHasStock(skuIdList);
+            List<SkuHasStockVo> data = (List<SkuHasStockVo>) r.get("data");
+            map = data.stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, SkuHasStockVo::getHasStock));
+        }catch (Exception e){
+            log.error("库存服务查询异常！原因：{}", e);
+        }
+        Map<Long, Boolean> finalMap = map;
+        List<SkuEsModel> models = skuInfoEntities.stream().map(sku -> {
+            SkuEsModel model = new SkuEsModel();
+            BeanUtils.copyProperties(sku, model);
+            model.setSkuPrice(sku.getPrice());
+            model.setSkuImage(sku.getSkuDefaultImg());
+            BrandEntity brand = brandService.getById(model.getBrandId());
+            model.setBrandName(brand.getName());
+            model.setBrandImg(brand.getLogo());
+            CategoryEntity category = categoryService.getById(model.getCatalogId());
+            model.setCatalogName(category.getName());
+            model.setAttrs(list);
+            model.setHotScore(0L);
+            model.setHasStock(finalMap == null || finalMap.get(sku.getSkuId()));
+            return model;
+        }).toList();
+    }
 }
