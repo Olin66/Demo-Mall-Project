@@ -3,6 +3,7 @@ package com.mall.product.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mall.common.constant.ProductConstant;
 import com.mall.common.to.SkuHasStockVo;
 import com.mall.common.to.SkuReductionTo;
 import com.mall.common.to.SpuBoundsTo;
@@ -14,6 +15,7 @@ import com.mall.common.utils.R;
 import com.mall.product.dao.SpuInfoDao;
 import com.mall.product.entity.*;
 import com.mall.product.feign.CouponFeignService;
+import com.mall.product.feign.SearchFeignService;
 import com.mall.product.feign.WareFeignService;
 import com.mall.product.service.*;
 import com.mall.product.vo.SpuSaveVo;
@@ -53,6 +55,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     CouponFeignService couponFeignService;
     @Autowired
     WareFeignService wareFeignService;
+    @Autowired
+    SearchFeignService searchFeignService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -195,7 +199,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             List<SkuHasStockVo> data = (List<SkuHasStockVo>) r.get("data");
             map = data.stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, SkuHasStockVo::getHasStock));
         }catch (Exception e){
-            log.error("库存服务查询异常！原因：{}", e);
+            log.error("库存服务查询异常！原因：", e);
         }
         Map<Long, Boolean> finalMap = map;
         List<SkuEsModel> models = skuInfoEntities.stream().map(sku -> {
@@ -213,5 +217,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             model.setHasStock(finalMap == null || finalMap.get(sku.getSkuId()));
             return model;
         }).toList();
+        R r = searchFeignService.productStatusUp(models);
+        if (r.getCode() == 0){
+            baseMapper.updateSpuStatus(spuId, ProductConstant.StatusEnum.SPU_UP.getCode());
+        }
     }
 }
