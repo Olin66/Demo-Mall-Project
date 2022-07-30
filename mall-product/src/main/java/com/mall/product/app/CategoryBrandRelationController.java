@@ -1,20 +1,18 @@
-package com.mall.product.controller;
+package com.mall.product.app;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.mall.common.utils.PageUtils;
+import com.mall.common.utils.R;
+import com.mall.product.entity.BrandEntity;
+import com.mall.product.entity.CategoryBrandRelationEntity;
+import com.mall.product.service.CategoryBrandRelationService;
+import com.mall.product.vo.BrandVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.mall.product.entity.BrandEntity;
-import com.mall.product.vo.BrandVo;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import com.mall.product.entity.CategoryBrandRelationEntity;
-import com.mall.product.service.CategoryBrandRelationService;
-import com.mall.common.utils.PageUtils;
-import com.mall.common.utils.R;
 
 
 /**

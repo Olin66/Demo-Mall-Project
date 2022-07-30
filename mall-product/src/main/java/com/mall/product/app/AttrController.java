@@ -1,19 +1,18 @@
-package com.mall.product.controller;
+package com.mall.product.app;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
+import com.mall.common.utils.PageUtils;
+import com.mall.common.utils.R;
 import com.mall.product.entity.ProductAttrValueEntity;
+import com.mall.product.service.AttrService;
 import com.mall.product.service.ProductAttrValueService;
 import com.mall.product.vo.AttrRespVo;
 import com.mall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.mall.product.service.AttrService;
-import com.mall.common.utils.PageUtils;
-import com.mall.common.utils.R;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 /**

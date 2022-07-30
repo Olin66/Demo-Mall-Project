@@ -1,4 +1,4 @@
-package com.mall.product.controller;
+package com.mall.product.app;
 
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.R;
