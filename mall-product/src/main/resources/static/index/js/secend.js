@@ -1,6 +1,6 @@
 $(window).scroll(function(event) {
   var hi = $(document).scrollTop();
-  console.log(hi)
+  // console.log(hi)
 })
 var myswiper = new Swiper(".swiper_section_second_list_left", {
   prevButton: '.swiper-button-prev',
@@ -90,10 +90,10 @@ $(".swiper_section_second_list_left").mouseover(function() {
 //发现center轮播按钮
 $(".swiper_section_find_center_list").mouseover(function() {
   $(".center_list").css("display", "block")
-  console.log("aaa")
+  // console.log("aaa")
 }).mouseout(function() {
   $(".center_list").css("display", "none")
-  console.log("bbb")
+  // console.log("bbb")
 
 })
 //觅me轮播按钮
@@ -101,18 +101,18 @@ $(".swiper_section_find_center_list").mouseover(function() {
 $(".swiper_section_ling_right_list").mouseover(function() {
   $(".right_list1").css("display", "block")
   $(".right_list2").css("display", "block")
-  console.log("aaa")
+  // console.log("aaa")
 }).mouseout(function() {
   $(".right_list1").css("display", "none")
   $(".right_list2").css("display", "none")
-  console.log("bbb")
+  // console.log("bbb")
 
 })
 //秒杀右侧图片小轮播
 $(".section_second_list_right_button p").mouseover(function() {
   $(".section_second_list_right_button p").removeClass('section_second_list_right_button_active')
   $(this).addClass("section_second_list_right_button_active")
-  console.log($(this).index());
+  // console.log($(this).index());
   var other = $(this).siblings().index()
   $(".section_second_list_right li").eq(other).animate({
     opacity: 0

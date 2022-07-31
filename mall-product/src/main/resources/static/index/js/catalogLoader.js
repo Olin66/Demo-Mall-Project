@@ -1,20 +1,21 @@
 $(function(){
-    $.getJSON("index/json/catalog.json",function (data) {
+    $.getJSON("/index/catalog.json",function (data) {
 
         var ctgall=data;
+        // console.log(data);
         $(".header_main_left_a").each(function(){
             var ctgnums= $(this).attr("ctg-data");
+            // console.log(ctgnums)
             if(ctgnums){
                 var panel=$("<div class='header_main_left_main'></div>");
                 var panelol=$("<ol class='header_ol'></ol>");
                 var  ctgnumArray = ctgnums.split(",");
                 $.each(ctgnumArray,function (i,ctg1Id) {
                     var ctg2list= ctgall[ctg1Id];
+                    // console.log("ctg2list:", ctg2list);
                     $.each(ctg2list,function (i,ctg2) {
+                        // console.log("ctg2:", ctg2);
                         var cata2link=$("<a href='#' style= 'color: #111;' class='aaa'>"+ctg2.name+"  ></a>");
-
-
-                        console.log(cata2link.html());
                         var li=$("<li></li>");
                         var  ctg3List=ctg2["catalog3List"];
                         var len=0;
@@ -36,7 +37,7 @@ $(function(){
                 panel.append(panelol);
                 $(this).after(panel);
                 $(this).parent().addClass("header_li2");
-                console.log($(".header_main_left").html());
+                // console.log($(".header_main_left").html());
             }
         });
     });

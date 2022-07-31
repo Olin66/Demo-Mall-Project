@@ -60,11 +60,11 @@ $(window).scroll(function(event) {
 $(".left_floor li").click(function(){
   $(".left_floor li").removeClass("left_floor_active");
   $(this).addClass('left_floor_active');
-  console.log($(this).index());
+  // console.log($(this).index());
 });
 $(".left_floor li").mouseover(function(){
   $(this).addClass('left_floor_active1');
-  console.log($(this).index());
+  // console.log($(this).index());
 }).mouseout(function(){
   $(this).removeClass('left_floor_active1');
 

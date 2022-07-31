@@ -9,11 +9,14 @@ import com.mall.product.dao.CategoryDao;
 import com.mall.product.entity.CategoryEntity;
 import com.mall.product.service.CategoryBrandRelationService;
 import com.mall.product.service.CategoryService;
+import com.mall.product.vo.CatalogSecondVo;
+import com.mall.product.vo.CatalogThirdVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service("categoryService")
@@ -62,9 +65,36 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
     }
 
-    private void getParentPath(List<Long> list, Long catelogId){
+    @Override
+    public Map<String, List<CatalogSecondVo>> getCatalogJson() {
+        List<CategoryEntity> levelOne = getLevelOneCategories();
+        Map<String, List<CatalogSecondVo>> collect = levelOne.stream().collect(Collectors
+                .toMap(k -> k.getCatId().toString(), v -> {
+                    List<CategoryEntity> entities2 = baseMapper.selectList(new QueryWrapper<CategoryEntity>().
+                            eq("parent_cid", v.getCatId()));
+                    List<CatalogSecondVo> catalogSecondVos = null;
+                    if (entities2 != null) {
+                        catalogSecondVos = entities2.stream().map(item -> {
+                            List<CategoryEntity> entities3 = baseMapper.selectList(new QueryWrapper<CategoryEntity>()
+                                    .eq("parent_cid", item.getCatId()));
+                            List<CatalogThirdVo> thirds = null;
+                            if (entities3 != null) {
+                                thirds = entities3.stream().map(l ->
+                                        new CatalogThirdVo(item.getCatId().toString(),
+                                                l.getCatId().toString(), l.getName())).toList();
+                            }
+                            return new CatalogSecondVo(v.getCatId().toString(), thirds,
+                                    item.getCatId().toString(), item.getName());
+                        }).toList();
+                    }
+                    return catalogSecondVos;
+                }));
+        return collect;
+    }
+
+    private void getParentPath(List<Long> list, Long catelogId) {
         CategoryEntity category = this.getById(catelogId);
-        if (category.getParentCid() != 0){
+        if (category.getParentCid() != 0) {
             getParentPath(list, category.getParentCid());
         }
         list.add(catelogId);
