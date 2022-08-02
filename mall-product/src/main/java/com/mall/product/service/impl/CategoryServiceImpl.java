@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -78,19 +79,22 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
         String catalogJSON = ops.get("catalogJSON");
         if (StringUtils.isEmpty(catalogJSON)) {
-            Map<String, List<CatalogSecondVo>> fromDatabase = getCatalogJsonFromDatabase();
-            String json = JacksonUtils.toJson(fromDatabase);
-            ops.set("catalogJSON", json);
-            return fromDatabase;
+            return getCatalogJsonFromDatabase();
         }
         return JacksonUtils.toObj(catalogJSON, new TypeReference<>() {
         });
     }
 
-    public Map<String, List<CatalogSecondVo>> getCatalogJsonFromDatabase() {
+    public synchronized Map<String, List<CatalogSecondVo>> getCatalogJsonFromDatabase() {
+        ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
+        String catalogJSON = ops.get("catalogJSON");
+        if (!StringUtils.isEmpty(catalogJSON)) {
+            return JacksonUtils.toObj(catalogJSON, new TypeReference<>() {
+            });
+        }
         List<CategoryEntity> list = baseMapper.selectList(null);
         List<CategoryEntity> levelOne = getParentCid(list, 0L);
-        return levelOne.stream().collect(Collectors
+        Map<String, List<CatalogSecondVo>> result = levelOne.stream().collect(Collectors
                 .toMap(k -> k.getCatId().toString(), v -> {
                     List<CategoryEntity> entities2 = getParentCid(list, v.getParentCid());
                     List<CatalogSecondVo> catalogSecondVos = null;
@@ -110,6 +114,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                     if (catalogSecondVos == null) return new ArrayList<>();
                     else return catalogSecondVos;
                 }));
+        String json = JacksonUtils.toJson(result);
+        ops.set("catalogJSON", json, 1, TimeUnit.DAYS);
+        return result;
     }
 
     private List<CategoryEntity> getParentCid(List<CategoryEntity> list, Long parentCid) {
