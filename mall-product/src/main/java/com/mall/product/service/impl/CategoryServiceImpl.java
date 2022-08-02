@@ -67,16 +67,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Override
     public Map<String, List<CatalogSecondVo>> getCatalogJson() {
-        List<CategoryEntity> levelOne = getLevelOneCategories();
-        Map<String, List<CatalogSecondVo>> collect = levelOne.stream().collect(Collectors
+        List<CategoryEntity> list = baseMapper.selectList(null);
+        List<CategoryEntity> levelOne = getParentCid(list, 0L);
+        return levelOne.stream().collect(Collectors
                 .toMap(k -> k.getCatId().toString(), v -> {
-                    List<CategoryEntity> entities2 = baseMapper.selectList(new QueryWrapper<CategoryEntity>().
-                            eq("parent_cid", v.getCatId()));
+                    List<CategoryEntity> entities2 = getParentCid(list, v.getParentCid());
                     List<CatalogSecondVo> catalogSecondVos = null;
                     if (entities2 != null) {
                         catalogSecondVos = entities2.stream().map(item -> {
-                            List<CategoryEntity> entities3 = baseMapper.selectList(new QueryWrapper<CategoryEntity>()
-                                    .eq("parent_cid", item.getCatId()));
+                            List<CategoryEntity> entities3 = getParentCid(list, item.getParentCid());
                             List<CatalogThirdVo> thirds = null;
                             if (entities3 != null) {
                                 thirds = entities3.stream().map(l ->
@@ -87,9 +86,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                                     item.getCatId().toString(), item.getName());
                         }).toList();
                     }
-                    return catalogSecondVos;
+                    if (catalogSecondVos==null) return new ArrayList<>();
+                    else return catalogSecondVos;
                 }));
-        return collect;
+    }
+
+    private List<CategoryEntity> getParentCid(List<CategoryEntity> list, Long parentCid) {
+        return list.stream().filter(o -> Objects.equals(o.getParentCid(), parentCid)).toList();
     }
 
     private void getParentPath(List<Long> list, Long catelogId) {
