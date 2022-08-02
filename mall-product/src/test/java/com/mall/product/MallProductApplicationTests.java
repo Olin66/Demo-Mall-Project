@@ -1,17 +1,16 @@
 package com.mall.product;
 
 //import com.aliyun.oss.*;
-import com.mall.product.entity.BrandEntity;
-import com.mall.product.service.BrandService;
+
 import com.mall.product.service.CategoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Arrays;
+import java.util.UUID;
 
 @SpringBootTest
 class MallProductApplicationTests {
@@ -20,9 +19,20 @@ class MallProductApplicationTests {
     CategoryService categoryService;
 
     @Test
-    public void test(){
+    public void test() {
         Long[] path = categoryService.getCatelogPath(225L);
         System.out.println(Arrays.toString(path));
+    }
+
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
+
+    @Test
+    public void redisTest() {
+        ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
+        ops.set("hello", "world_" + UUID.randomUUID());
+        String hello = ops.get("hello");
+        System.out.println(hello);
     }
 
 //    @Autowired

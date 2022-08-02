@@ -25,7 +25,11 @@
 #  level:
 #    com.mall: debug
 
+#spring:
+#  thymeleaf:
+#    cache: false
 
-spring:
-  thymeleaf:
-    cache: false
+#spring:
+#  redis:
+#    host: 192.168.56.10
+#    port: 6379
