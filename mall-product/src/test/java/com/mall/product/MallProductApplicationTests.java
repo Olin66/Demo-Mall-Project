@@ -4,6 +4,7 @@ package com.mall.product;
 
 import com.mall.product.service.CategoryService;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -33,6 +34,14 @@ class MallProductApplicationTests {
         ops.set("hello", "world_" + UUID.randomUUID());
         String hello = ops.get("hello");
         System.out.println(hello);
+    }
+
+    @Autowired
+    RedissonClient redissonClient;
+
+    @Test
+    void redissonTest(){
+        System.out.println(redissonClient);
     }
 
 //    @Autowired
