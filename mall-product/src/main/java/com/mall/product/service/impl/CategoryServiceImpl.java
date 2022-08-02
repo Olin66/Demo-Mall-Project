@@ -92,24 +92,23 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                 .setIfAbsent("lock", uuid, 300, TimeUnit.SECONDS);
         while (true) {
             if (Boolean.TRUE.equals(lock)) {
-                System.out.println("Locked!");
                 Map<String, List<CatalogSecondVo>> result;
                 try {
                     result = getDataFromDatabase();
                 } finally {
                     String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
-                    stringRedisTemplate.execute(new DefaultRedisScript<>(script), List.of("lock"), uuid);
+                    stringRedisTemplate.execute(new DefaultRedisScript<>(script, Long.class), List.of("lock"), uuid);
                 }
                 return result;
             }
             lock = stringRedisTemplate.opsForValue()
                     .setIfAbsent("lock", uuid, 300, TimeUnit.SECONDS);
-            System.out.println("Unlocked!");
+            try {
+                Thread.sleep(200);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
-    }
-
-    public synchronized Map<String, List<CatalogSecondVo>> getCatalogJsonFromDatabaseWithLocalLock() {
-        return getDataFromDatabase();
     }
 
     private Map<String, List<CatalogSecondVo>> getDataFromDatabase() {
