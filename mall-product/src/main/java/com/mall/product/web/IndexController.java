@@ -29,4 +29,10 @@ public class IndexController {
     public Map<String, List<CatalogSecondVo>> getCatelogJson(){
         return categoryService.getCatalogJson();
     }
+
+    @ResponseBody
+    @GetMapping("/hello")
+    public String hello(){
+        return "hello";
+    }
 }
