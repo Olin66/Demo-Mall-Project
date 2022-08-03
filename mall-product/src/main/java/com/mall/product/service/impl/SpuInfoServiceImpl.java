@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.common.constant.ProductConstant;
-import com.mall.common.to.SkuHasStockVo;
+import com.mall.common.to.SkuHasStockTo;
 import com.mall.common.to.SkuReductionTo;
 import com.mall.common.to.SpuBoundsTo;
 import com.mall.common.to.es.SkuEsModel;
@@ -196,8 +196,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         Map<Long, Boolean> map = null;
         try {
             R r = wareFeignService.getSkusHasStock(skuIdList);
-            List<SkuHasStockVo> data = (List<SkuHasStockVo>) r.get("data");
-            map = data.stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, SkuHasStockVo::getHasStock));
+            List<SkuHasStockTo> data = (List<SkuHasStockTo>) r.get("data");
+            map = data.stream().collect(Collectors.toMap(SkuHasStockTo::getSkuId, SkuHasStockTo::getHasStock));
         }catch (Exception e){
             log.error("库存服务查询异常！原因：", e);
         }

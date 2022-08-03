@@ -3,7 +3,7 @@ package com.mall.ware.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.mall.common.to.SkuHasStockVo;
+import com.mall.common.to.SkuHasStockTo;
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.Query;
 import com.mall.common.utils.R;
@@ -71,9 +71,9 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
     }
 
     @Override
-    public List<SkuHasStockVo> getSkuHasStock(List<Long> skuIds) {
+    public List<SkuHasStockTo> getSkuHasStock(List<Long> skuIds) {
         return skuIds.stream().map(sku -> {
-            SkuHasStockVo vo = new SkuHasStockVo();
+            SkuHasStockTo vo = new SkuHasStockTo();
             Long count = baseMapper.getSkuStock(sku);
             vo.setSkuId(sku);
             vo.setHasStock(count != null && count > 0);

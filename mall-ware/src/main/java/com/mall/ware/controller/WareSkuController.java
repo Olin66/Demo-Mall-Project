@@ -1,6 +1,6 @@
 package com.mall.ware.controller;
 
-import com.mall.common.to.SkuHasStockVo;
+import com.mall.common.to.SkuHasStockTo;
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.R;
 import com.mall.ware.entity.WareSkuEntity;
@@ -29,7 +29,7 @@ public class WareSkuController {
 
     @PostMapping("/hasstock")
     public R getSkusHasStock(@RequestBody List<Long> skuIds){
-        List<SkuHasStockVo> vos = wareSkuService.getSkuHasStock(skuIds);
+        List<SkuHasStockTo> vos = wareSkuService.getSkuHasStock(skuIds);
         return R.ok().put("data", vos);
     }
 
