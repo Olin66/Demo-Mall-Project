@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -71,19 +72,46 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Override
     @Transactional
+    @CacheEvict(value = "category", allEntries = true)
     public void updateCascade(CategoryEntity category) {
         this.updateById(category);
         categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
     }
 
     @Override
-    @Cacheable(value = "category", key = "#root.method.name")
+    @Cacheable(value = "category", key = "#root.methodName", sync = true)
     public List<CategoryEntity> getLevelOneCategories() {
         return baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
     }
 
     @Override
+    @Cacheable(value = "category", key = "#root.methodName", sync = true)
     public Map<String, List<CatalogSecondVo>> getCatalogJson() {
+        List<CategoryEntity> list = baseMapper.selectList(null);
+        List<CategoryEntity> levelOne = getParentCid(list, 0L);
+        return levelOne.stream().collect(Collectors
+                .toMap(k -> k.getCatId().toString(), v -> {
+                    List<CategoryEntity> entities2 = getParentCid(list, v.getParentCid());
+                    List<CatalogSecondVo> catalogSecondVos = null;
+                    if (entities2 != null) {
+                        catalogSecondVos = entities2.stream().map(item -> {
+                            List<CategoryEntity> entities3 = getParentCid(list, item.getParentCid());
+                            List<CatalogThirdVo> thirds = null;
+                            if (entities3 != null) {
+                                thirds = entities3.stream().map(l ->
+                                        new CatalogThirdVo(item.getCatId().toString(),
+                                                l.getCatId().toString(), l.getName())).toList();
+                            }
+                            return new CatalogSecondVo(v.getCatId().toString(), thirds,
+                                    item.getCatId().toString(), item.getName());
+                        }).toList();
+                    }
+                    if (catalogSecondVos == null) return new ArrayList<>();
+                    else return catalogSecondVos;
+                }));
+    }
+
+    public Map<String, List<CatalogSecondVo>> getCatalogJson2() {
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
         String catalogJSON = ops.get("catalogJSON");
         if (StringUtils.isEmpty(catalogJSON)) {
@@ -99,7 +127,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         Map<String, List<CatalogSecondVo>> data;
         try {
             data = getDataFromDatabase();
-        }finally {
+        } finally {
             lock.unlock();
         }
         return data;
@@ -125,7 +153,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                     .setIfAbsent("lock", uuid, 300, TimeUnit.SECONDS);
             try {
                 Thread.sleep(200);
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
