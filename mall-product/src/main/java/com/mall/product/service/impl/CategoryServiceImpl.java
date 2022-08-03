@@ -14,6 +14,8 @@ import com.mall.product.service.CategoryService;
 import com.mall.product.vo.CatalogSecondVo;
 import com.mall.product.vo.CatalogThirdVo;
 import org.apache.commons.lang.StringUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -34,6 +36,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Autowired
     StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    RedissonClient redisson;
 
 
     @Override
@@ -80,11 +85,24 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
         String catalogJSON = ops.get("catalogJSON");
         if (StringUtils.isEmpty(catalogJSON)) {
-            return getCatalogJsonFromDatabaseWithRedisLock();
+            return getCatalogJsonFromDatabaseWithRedissonLock();
         }
         return JacksonUtils.toObj(catalogJSON, new TypeReference<>() {
         });
     }
+
+    public Map<String, List<CatalogSecondVo>> getCatalogJsonFromDatabaseWithRedissonLock() {
+        RLock lock = redisson.getLock("catalogJson-lock");
+        lock.lock();
+        Map<String, List<CatalogSecondVo>> data;
+        try {
+            data = getDataFromDatabase();
+        }finally {
+            lock.unlock();
+        }
+        return data;
+    }
+
 
     public Map<String, List<CatalogSecondVo>> getCatalogJsonFromDatabaseWithRedisLock() {
         String uuid = UUID.randomUUID().toString();
@@ -109,6 +127,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                 e.printStackTrace();
             }
         }
+    }
+
+    public synchronized Map<String, List<CatalogSecondVo>> getCatalogJsonFromDatabaseWithLocalLock() {
+        return getDataFromDatabase();
     }
 
     private Map<String, List<CatalogSecondVo>> getDataFromDatabase() {
