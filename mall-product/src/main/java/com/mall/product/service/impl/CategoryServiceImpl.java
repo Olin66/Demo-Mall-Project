@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -76,6 +77,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     }
 
     @Override
+    @Cacheable(value = "category", key = "#root.method.name")
     public List<CategoryEntity> getLevelOneCategories() {
         return baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
     }
