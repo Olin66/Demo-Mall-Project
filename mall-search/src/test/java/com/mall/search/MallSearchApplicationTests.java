@@ -7,6 +7,8 @@ import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.Buckets;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
@@ -39,6 +41,18 @@ class MallSearchApplicationTests {
     void test() throws IOException {
         SearchResponse<SkuEsModel> response = client.search(s -> s.index(EsConstant.PRODUCT_INDEX).query(q -> q.matchAll(m -> m)), SkuEsModel.class);
         for (Hit<SkuEsModel> hit : response.hits().hits()) System.out.println(hit.source());
+    }
+
+    @Test
+    void test1() throws IOException {
+        SearchRequest.Builder sb = new SearchRequest.Builder();
+        Query.Builder qb = new Query.Builder();
+        BoolQuery.Builder bb = new BoolQuery.Builder();
+        bb.must(m -> m.match(item -> item.field("skuTitle").query("白色")));
+        sb.index(EsConstant.PRODUCT_INDEX).query(qb.bool(bb.build()).build());
+        SearchRequest request = sb.build();
+        SearchResponse<SkuEsModel> response = client.search(request, SkuEsModel.class);
+        for (Hit<SkuEsModel> hit: response.hits().hits()) System.out.println(hit.source());
     }
 
     @Test
