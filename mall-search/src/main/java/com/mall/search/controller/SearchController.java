@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.io.IOException;
+
 @Controller
 public class SearchController {
 
@@ -15,7 +17,7 @@ public class SearchController {
     MallSearchService mallSearchService;
 
     @GetMapping("/list.html")
-    public String listPage(SearchParamVo param, Model model){
+    public String listPage(SearchParamVo param, Model model) throws IOException {
         SearchResponseVo response = mallSearchService.search(param);
         model.addAttribute("result", response);
         return "list";

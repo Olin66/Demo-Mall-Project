@@ -1,14 +1,20 @@
 package com.mall.search;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.Buckets;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
-import co.elastic.clients.elasticsearch.core.*;
+import co.elastic.clients.elasticsearch.core.IndexRequest;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
+import com.mall.common.to.es.SkuEsModel;
+import com.mall.search.constant.EsConstant;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -18,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -29,8 +36,31 @@ class MallSearchApplicationTests {
     private ElasticsearchClient client;
 
     @Test
-    void test() {
-        System.out.println(client);
+    void test() throws IOException {
+        SearchResponse<SkuEsModel> response = client.search(s -> s.index(EsConstant.PRODUCT_INDEX).query(q -> q.matchAll(m -> m)), SkuEsModel.class);
+        for (Hit<SkuEsModel> hit : response.hits().hits()) System.out.println(hit.source());
+    }
+
+    @Test
+    void searchTest() throws IOException {
+        SearchRequest request = SearchRequest.of(s ->
+                s.index(EsConstant.PRODUCT_INDEX)
+                        .query(q -> q.bool(b -> b
+                                .must(m -> m.match(item ->
+                                        item.field("skuTitle").query("白色")))
+                                .filter(f -> f.term(t -> t.field("catalogId").value(225)))
+                                .filter(f -> f.terms(t -> t.field("brandId").terms(v -> v.value(List.of(FieldValue.of(9), FieldValue.of(10), FieldValue.of(2))))))
+                                .filter(f -> f.term(t -> t.field("hasStock").value(true)))
+                                .filter(f -> f.range(r -> r.field("skuPrice").gte(JsonData.of(6000)).lte(JsonData.of(8000))))
+                                .filter(f -> f.nested(n -> n.path("attrs")
+                                        .query(qq -> qq.bool(bb -> bb
+                                                .must(mm -> mm.term(t -> t.field("attrs.attrId").value(15)))
+                                                .must(mm -> mm.terms(t -> t.field("attrs.attrValue").terms(v -> v.value(List.of(FieldValue.of("海思（Hisilicon）"), FieldValue.of("以官网信息为准"))))))))))
+                        )).sort(ss -> ss.field(f -> f.field("skuPrice").order(SortOrder.Desc)))
+                        .highlight(h -> h.fields("skuTitle", f -> f.preTags("<b style='color:red'>").postTags("</b>")))
+                        .from(0).size(1));
+        SearchResponse<SkuEsModel> response = client.search(request, SkuEsModel.class);
+        for (Hit<SkuEsModel> hit : response.hits().hits()) System.out.println(hit.source());
     }
 
     @Test
