@@ -40,7 +40,7 @@ public class MallSearchServiceImpl implements MallSearchService {
         BoolQuery.Builder bb = new BoolQuery.Builder();
         if (!StringUtils.isEmpty(param.getKeyword())) {
             bb.must(m -> m.match(item -> item.field("skuTitle").query(param.getKeyword())));
-            sb.highlight(h -> h.fields("skuTitle", f -> f.preTags("<b style='color:red'>").postTags("</b>")));
+            sb.highlight(h -> h.fields("skuTitle", f -> f.preTags("<b style='color:blue'>").postTags("</b>")));
         }
         if (param.getCatalog3Id() != null) {
             bb.filter(f -> f.term(t -> t.field("catalogId").value(param.getCatalog3Id())));
