@@ -11,6 +11,7 @@ public class SearchResponseVo {
     private Integer pageNum;
     private Long total;
     private Integer totalPages;
+    private List<Integer> pageNavs;
     private List<BrandVo> brands;
     private List<AttrVo> attrs;
     private List<CatalogVo> catalogs;

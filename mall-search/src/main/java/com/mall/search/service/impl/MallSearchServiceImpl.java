@@ -137,6 +137,11 @@ public class MallSearchServiceImpl implements MallSearchService {
         }
         vo.setTotal(value);
         vo.setTotalPages(totalPages);
+        List<Integer> integers = new ArrayList<>();
+        for (int i = 1;i <= totalPages;i++){
+            integers.add(i);
+        }
+        vo.setPageNavs(integers);
         vo.setPageNum(param.getPageNum());
         List<LongTermsBucket> catalogAgg = response.aggregations().get("catalog_agg").lterms().buckets().array();
         List<CatalogVo> catalogVos = catalogAgg.stream().map(bucket -> {

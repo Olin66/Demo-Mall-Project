@@ -402,8 +402,8 @@
         <a href="http://olinmall.com"><img src="/static/search/./image/logo1.jpg" alt=""></a>
     </div>
     <div class="header_form">
-        <input type="text" placeholder="手机"/>
-        <a href="/static/search/#">搜索</a>
+        <input id="keyword_input" type="text" placeholder="搜索" th:value="${param.keyword}"/>
+        <a href="javascript:searchByKeyword()">搜索</a>
     </div>
     <div class="header_ico">
         <div class="header_gw">
@@ -1226,24 +1226,24 @@
                         <div class="filter_page">
                             <div class="page_wrap">
                             <span class="page_span1">
-                                <a href="/static/search/#">
+                                <a class="page_a" th:attr="pn=${result.getPageNum()-1}"
+                                   th:if="${result.getPageNum()>1}">
                                     < 上一页
                                 </a>
-                                <a href="/static/search/#" style="border: 0;color:#ee2222;background: #fff">1</a>
-                                <a href="/static/search/#">2</a>
-                                <a href="/static/search/#">3</a>
-                                <a href="/static/search/#"
-                                   style="border: 0;font-size: 20px;color: #999;background: #fff">...</a>
-                                <a href="/static/search/#">169</a>
-                                <a href="/static/search/#">
+                                <a class="page_a" th:each="nav:${result.pageNavs}"
+                                   th:attr="pn=${nav}, style=${nav == result.pageNum?
+                                   'border: 0;color: #ee2222;background: #fff;':'cursor: pointer;'}"
+                                >[[${nav}]]</a>
+                                <a class="page_a" th:attr="pn=${result.getPageNum()+1}"
+                                   th:if="${result.getPageNum() < result.getTotalPages()}">
                                     下一页 >
                                 </a>
                             </span>
                                 <span class="page_span2">
-                                <em>共<b>169</b>页&nbsp;&nbsp;到第</em>
+                                <em>共<b>[[${result.totalPages}]]</b>页&nbsp;&nbsp;到第</em>
                                 <input type="number" value="1">
                                 <em>页</em>
-                                <a href="/static/search/#">确定</a>
+                                <a class="page_submit">确定</a>
                             </span>
                             </div>
                         </div>
@@ -1994,6 +1994,21 @@
     })
 
     function searchProducts(name, value) {
+        let href = location.href
+        if (name === 'keyword' && href.search(name) !== -1) {
+            const begin = href.search(name);
+            let str = undefined;
+            for (let i = begin; i <= href.length; i++) {
+                if (href.charAt(i) === '&') {
+                    str = href.substring(begin, i);
+                }
+            }
+            if (str === undefined) {
+                str = href.substring(begin, href.length);
+            }
+            location.href = href.replace(str, "keyword=" + value);
+            return;
+        }
         if (location.href.includes(name)) {
             location.reload();
             return;
@@ -2003,6 +2018,30 @@
         } else {
             location.href = location.href + "&" + name + "=" + value;
         }
+    }
+
+    function searchByKeyword() {
+        searchProducts("keyword", $("#keyword_input").val())
+    }
+
+    $(".page_a").click(function () {
+        let pn = $(this).attr("pn");
+        var href = location.href;
+        if (href.indexOf("pageNum") !== -1) {
+            location.href = replaceParamVal(href, "pageNum", pn);
+        } else {
+            if (href.indexOf('?') === -1) {
+                location.href = location.href + "?pageNum=" + pn;
+            } else {
+                location.href = location.href + "&pageNum=" + pn;
+            }
+        }
+    })
+
+    function replaceParamVal(url, paramName, replaceVal) {
+        let oUrl = url.toString();
+        let re = eval('/(' + paramName + '=)([^&]*)/gi');
+        return oUrl.replace(re, paramName + '=' + replaceVal);
     }
 </script>
 </body>
