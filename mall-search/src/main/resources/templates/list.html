@@ -1181,8 +1181,9 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="/static/search/#">
-                                            <input id="showHasStock" type="checkbox"/>
+                                        <a th:with="c=${param.hasStock}">
+                                            <input id="showHasStock" type="checkbox"
+                                                   th:checked="${#strings.equals(c, '1')}"/>
                                             仅显示有货
                                         </a>
                                     </li>
@@ -2051,17 +2052,6 @@
     }
 
     $(".sort_a").click(function () {
-        // $(this).css({"color": "#FFF", "border-color": "#e4393c", "background": "#e4393c"})
-        // $(this).toggleClass("desc");
-        // if ($(this).hasClass("desc")) {
-        //     let text = $(this).text().replace("↓", "").replace("↑", "");
-        //     text = text + "↓"
-        //     $(this).text(text);
-        // } else {
-        //     let text = $(this).text().replace("↓", "").replace("↑", "");
-        //     text = text + "↑"
-        //     $(this).text(text);
-        // }
         let sort = $(this).attr("sort");
         let val = $(this).hasClass("desc") ? sort + "_desc" : sort + "_asc";
         location.href = replaceAndAddParamVal(location.href.toString(), "sort", val);
@@ -2077,6 +2067,19 @@
         let to = $("#skuPriceTo").val();
         let query = from + "_" + to;
         location.href = replaceAndAddParamVal(location.href.toString(), "skuPrice", query);
+    })
+
+    $("#showHasStock").change(function () {
+        if ($(this).prop("checked")){
+            location.href = replaceAndAddParamVal(location.href.toString(), "hasStock", 1);
+        }else{
+            let re = eval('/(hasStock=)([^&]*)/gi');
+            let href = location.href.toString().replace(re, '');
+            if (href.endsWith("?")){
+                href = href.replace("?", "");
+            }
+            location.href = href;
+        }
     })
 </script>
 </body>
