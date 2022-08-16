@@ -67,8 +67,8 @@ public class MallSearchServiceImpl implements MallSearchService {
         if (!StringUtils.isEmpty(param.getSkuPrice())) {
             String[] strings = param.getSkuPrice().split("_");
             bb.filter(f -> f.range(r -> r.field("skuPrice")
-                    .gte(JsonData.of(StringUtils.isEmpty(strings[0])?0:strings[0]))
-                    .lte(JsonData.of(StringUtils.isEmpty(strings[1])?Long.MAX_VALUE:strings[1]))));
+                    .gte(JsonData.of(StringUtils.isEmpty(strings[0]) ? 0 : strings[0]))
+                    .lte(JsonData.of(strings.length > 1 ? strings[1] : Long.MAX_VALUE))));
         }
         sb.query(qb.bool(bb.build()).build());
         if (!StringUtils.isEmpty(param.getSort())) {
@@ -139,7 +139,7 @@ public class MallSearchServiceImpl implements MallSearchService {
         vo.setTotal(value);
         vo.setTotalPages(totalPages);
         List<Integer> integers = new ArrayList<>();
-        for (int i = 1;i <= totalPages;i++){
+        for (int i = 1; i <= totalPages; i++) {
             integers.add(i);
         }
         vo.setPageNavs(integers);
