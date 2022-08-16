@@ -1044,12 +1044,32 @@
                     <div class="filter">
                         <!--综合排序-->
                         <div class="filter_top">
-                            <div class="filter_top_left">
-                                <a href="/static/search/#">综合排序</a>
-                                <a href="/static/search/#">销量</a>
-                                <a href="/static/search/#">价格</a>
-                                <a href="/static/search/#">评论分</a>
-                                <a href="/static/search/#">上架时间</a>
+                            <div class="filter_top_left" th:with="p = ${param.sort}, r = ${param.skuPrice}">
+                                <a th:class="${(!#strings.isEmpty(p) && #strings.startsWith(p, 'hotScore') && #strings.endsWith(p, 'desc'))?
+                                'sort_a desc':'sort_a'}"
+                                   th:attr="style=${#strings.isEmpty(p) || #strings.startsWith(p, 'hotScore') ?
+                                   'color: #FFF;border-color: #e4393c;background: #e4393c':'color: #333;border-color: #CCC;background: #fff'}"
+                                   sort="hotScore" href="#">综合排序 [[${(!#strings.isEmpty(p) && #strings.startsWith(p,
+                                    'hotScore') && #strings.endsWith(p, 'desc'))?'↓':'↑'}]]</a>
+                                <a th:class="${(!#strings.isEmpty(p) && #strings.startsWith(p, 'saleCount')  && #strings.endsWith(p, 'desc'))?
+                                'sort_a desc':'sort_a'}"
+                                   th:attr="style=${!#strings.isEmpty(p) && #strings.startsWith(p, 'saleCount') ?
+                                   'color: #FFF;border-color: #e4393c;background: #e4393c':'color: #333;border-color: #CCC;background: #fff'}"
+                                   sort="saleCount" href="#">销量 [[${(!#strings.isEmpty(p) && #strings.startsWith(p,
+                                    'saleCount') && #strings.endsWith(p, 'desc'))?'↓':'↑'}]]</a>
+                                <a th:class="${(!#strings.isEmpty(p) && #strings.startsWith(p, 'skuPrice')  && #strings.endsWith(p, 'desc'))?
+                                'sort_a desc':'sort_a'}"
+                                   th:attr="style=${!#strings.isEmpty(p) && #strings.startsWith(p, 'skuPrice') ?
+                                   'color: #FFF;border-color: #e4393c;background: #e4393c':'color: #333;border-color: #CCC;background: #fff'}"
+                                   sort="skuPrice" href="#">价格 [[${(!#strings.isEmpty(p) && #strings.startsWith(p,
+                                    'skuPrice') && #strings.endsWith(p, 'desc'))?'↓':'↑'}]]</a>
+                                <a class="sort_a" href="#">评论分</a>
+                                <a class="sort_a" href="#">上架时间</a>
+                                <input id="skuPriceFrom" type="number" style="width: 100px;margin-left: 30px;"
+                                       th:value="${#strings.isEmpty(r)?'':#strings.substringBefore(r, '_')}"/>
+                                - <input id="skuPriceTo" type="number" style="width: 100px;"
+                                         th:value="${#strings.isEmpty(r)?'':#strings.substringAfter(r, '_')}"/>
+                                <button id="skuPriceSearchBtn">确定</button>
                             </div>
                             <div class="filter_top_right">
                             <span class="fp-text">
@@ -1162,7 +1182,7 @@
                                     </li>
                                     <li>
                                         <a href="/static/search/#">
-                                            <i></i>
+                                            <input id="showHasStock" type="checkbox"/>
                                             仅显示有货
                                         </a>
                                     </li>
@@ -1189,7 +1209,7 @@
                                     </a>
                                 </p>
                                 <ul class="tab_im">
-                                    <li><a href="/static/search/#" title="黑色">
+                                    <li><a href="/static/search/#" >
                                         <img th:src="${product.getSkuImage()}"></a></li>
                                 </ul>
                                 <p class="tab_R">
@@ -1995,29 +2015,15 @@
 
     function searchProducts(name, value) {
         let href = location.href
-        if (name === 'keyword' && href.search(name) !== -1) {
-            const begin = href.search(name);
-            let str = undefined;
-            for (let i = begin; i <= href.length; i++) {
-                if (href.charAt(i) === '&') {
-                    str = href.substring(begin, i);
-                }
-            }
-            if (str === undefined) {
-                str = href.substring(begin, href.length);
-            }
-            location.href = href.replace(str, "keyword=" + value);
+        if (name === 'keyword' && href.includes(name)) {
+            location.href = replaceAndAddParamVal(href, "keyword", value);
             return;
         }
         if (location.href.includes(name)) {
             location.reload();
             return;
         }
-        if (!location.href.includes("?")) {
-            location.href = location.href + "?" + name + "=" + value;
-        } else {
-            location.href = location.href + "&" + name + "=" + value;
-        }
+        location.href = replaceAndAddParamVal(href, name, value);
     }
 
     function searchByKeyword() {
@@ -2026,23 +2032,52 @@
 
     $(".page_a").click(function () {
         let pn = $(this).attr("pn");
-        var href = location.href;
-        if (href.indexOf("pageNum") !== -1) {
-            location.href = replaceParamVal(href, "pageNum", pn);
-        } else {
-            if (href.indexOf('?') === -1) {
-                location.href = location.href + "?pageNum=" + pn;
-            } else {
-                location.href = location.href + "&pageNum=" + pn;
-            }
-        }
+        let href = location.href;
+        location.href = replaceAndAddParamVal(href, "pageNum", pn);
     })
 
-    function replaceParamVal(url, paramName, replaceVal) {
+    function replaceAndAddParamVal(url, paramName, val) {
         let oUrl = url.toString();
-        let re = eval('/(' + paramName + '=)([^&]*)/gi');
-        return oUrl.replace(re, paramName + '=' + replaceVal);
+        if (oUrl.includes(paramName)) {
+            let re = eval('/(' + paramName + '=)([^&]*)/gi');
+            return oUrl.replace(re, paramName + '=' + val);
+        } else {
+            if (!oUrl.includes("?")) {
+                return oUrl + "?" + paramName + "=" + val;
+            } else {
+                return oUrl + "&" + paramName + "=" + val;
+            }
+        }
     }
+
+    $(".sort_a").click(function () {
+        // $(this).css({"color": "#FFF", "border-color": "#e4393c", "background": "#e4393c"})
+        // $(this).toggleClass("desc");
+        // if ($(this).hasClass("desc")) {
+        //     let text = $(this).text().replace("↓", "").replace("↑", "");
+        //     text = text + "↓"
+        //     $(this).text(text);
+        // } else {
+        //     let text = $(this).text().replace("↓", "").replace("↑", "");
+        //     text = text + "↑"
+        //     $(this).text(text);
+        // }
+        let sort = $(this).attr("sort");
+        let val = $(this).hasClass("desc") ? sort + "_desc" : sort + "_asc";
+        location.href = replaceAndAddParamVal(location.href.toString(), "sort", val);
+        $(".sort_a").css({"color": "#333", "border-color": "#ccc", "background": "#FFF"})
+        $(".sort_a").each(function () {
+            let text = $(this).text().replace("↓", "").replace("↑", "");
+            $(this).text(text);
+        })
+    })
+
+    $("#skuPriceSearchBtn").click(function () {
+        let from = $("#skuPriceFrom").val();
+        let to = $("#skuPriceTo").val();
+        let query = from + "_" + to;
+        location.href = replaceAndAddParamVal(location.href.toString(), "skuPrice", query);
+    })
 </script>
 </body>
 </html>
