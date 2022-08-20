@@ -13,5 +13,6 @@ public class SearchParamVo {
     private String skuPrice;
     private List<Long> brandId;
     private List<String> attrs;
-    Integer pageNum = 1;
+    private Integer pageNum = 1;
+    private String queryString;
 }

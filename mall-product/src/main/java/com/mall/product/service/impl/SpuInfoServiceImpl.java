@@ -195,7 +195,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 }).toList();
         Map<Long, Boolean> map = null;
         try {
-            List<SkuHasStockTo> data = wareFeignService.getSkusHasStock(skuIdList);
+            R r = wareFeignService.getSkusHasStock(skuIdList);
+            List<SkuHasStockTo> data = (List<SkuHasStockTo>) r.get("data");
             map = data.stream().collect(Collectors.toMap(SkuHasStockTo::getSkuId, SkuHasStockTo::getHasStock));
         }catch (Exception e){
             log.error("库存服务查询异常！原因：", e);

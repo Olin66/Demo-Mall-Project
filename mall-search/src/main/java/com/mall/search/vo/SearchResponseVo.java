@@ -15,4 +15,5 @@ public class SearchResponseVo {
     private List<BrandVo> brands;
     private List<AttrVo> attrs;
     private List<CatalogVo> catalogs;
+    private List<NavVo> navs;
 }

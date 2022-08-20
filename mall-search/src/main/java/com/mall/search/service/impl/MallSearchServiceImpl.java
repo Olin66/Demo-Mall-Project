@@ -15,8 +15,12 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
 import co.elastic.clients.elasticsearch.core.search.TotalHits;
 import co.elastic.clients.json.JsonData;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mall.common.to.es.SkuEsModel;
+import com.mall.common.utils.R;
+import com.mall.common.vo.AttrRespVo;
 import com.mall.search.constant.EsConstant;
+import com.mall.search.feign.ProductFeignService;
 import com.mall.search.service.MallSearchService;
 import com.mall.search.vo.*;
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -31,6 +37,9 @@ public class MallSearchServiceImpl implements MallSearchService {
 
     @Autowired
     private ElasticsearchClient client;
+
+    @Autowired
+    private ProductFeignService productFeignService;
 
     @Override
     public SearchResponseVo search(SearchParamVo param) throws IOException {
@@ -182,6 +191,32 @@ public class MallSearchServiceImpl implements MallSearchService {
             return attrVo;
         }).toList();
         vo.setAttrs(attrVos);
+        if (param.getAttrs() != null && !param.getAttrs().isEmpty()) {
+            List<NavVo> navVos = param.getAttrs().stream().map(attr -> {
+                NavVo navVo = new NavVo();
+                String[] strings = attr.split("_");
+                navVo.setNavValue(strings[1]);
+                R r = productFeignService.attrInfo(Long.parseLong(strings[0]));
+                if (r.getCode() == 0) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    AttrRespVo respVo = mapper.convertValue(r.get("attr"), AttrRespVo.class);
+                    String attrName = respVo.getAttrName();
+                    navVo.setNavName(attrName);
+                } else {
+                    navVo.setNavName(strings[0]);
+                }
+                String encode = URLEncoder.encode(attr, StandardCharsets.UTF_8);
+                encode = encode.replace("+", "%20");
+                String s = param.getQueryString()
+                        .replace("&attrs=" + encode, "")
+                        .replace("attrs=" + encode, "");
+                String link = "http://search.olinmall.com/list.html?" + s;
+                if (link.endsWith("?")) link = link.substring(0, link.length() - 1);
+                navVo.setLink(link);
+                return navVo;
+            }).toList();
+            vo.setNavs(navVos);
+        } else vo.setNavs(new ArrayList<>());
         return vo;
     }
 }

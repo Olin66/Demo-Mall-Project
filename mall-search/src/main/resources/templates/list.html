@@ -765,6 +765,13 @@
                 <a href="/static/search/#">游戏手机</a>
             </div>
         </div>
+        <div class="JD_ipone_one c">
+            <a th:href="${nav.getLink()}" th:each="nav:${result.getNavs()}">
+                <span th:text="${nav.getNavName()}"></span>:
+                <span th:text="${nav.getNavValue()}"></span>
+                ×
+            </a>
+        </div>
         <i><img src="/static/search/image/right-@1x.png" alt=""></i>
     </div>
 </div>
@@ -841,7 +848,7 @@
                     <div class="sl_value">
                         <ul>
                             <li th:each="val:${attr.getAttrValue()}">
-                                <a th:href="${'javascript:searchProducts(&quot;attrs&quot;, &quot;'+attr.attrId+'_'+val+'&quot;)'}"
+                                <a th:href="${'javascript:searchProductsAttrs(&quot;attrs&quot;, &quot;'+attr.attrId+'_'+val+'&quot;)'}"
                                    th:text="${val}"></a>
                             </li>
                         </ul>
@@ -1210,7 +1217,7 @@
                                     </a>
                                 </p>
                                 <ul class="tab_im">
-                                    <li><a href="/static/search/#" >
+                                    <li><a href="/static/search/#">
                                         <img th:src="${product.getSkuImage()}"></a></li>
                                 </ul>
                                 <p class="tab_R">
@@ -2014,6 +2021,10 @@
         $(this).css("color", "#727272")
     })
 
+    function searchProductsAttrs(name, value) {
+        location.href = replaceAndAddParamVal(location.href.toString(), name, value, true);
+    }
+
     function searchProducts(name, value) {
         let href = location.href
         if (name === 'keyword' && href.includes(name)) {
@@ -2037,11 +2048,19 @@
         location.href = replaceAndAddParamVal(href, "pageNum", pn);
     })
 
-    function replaceAndAddParamVal(url, paramName, val) {
+    function replaceAndAddParamVal(url, paramName, val, forceAdd) {
         let oUrl = url.toString();
         if (oUrl.includes(paramName)) {
-            let re = eval('/(' + paramName + '=)([^&]*)/gi');
-            return oUrl.replace(re, paramName + '=' + val);
+            if (forceAdd) {
+                if (!oUrl.includes("?")) {
+                    return oUrl + "?" + paramName + "=" + val;
+                } else {
+                    return oUrl + "&" + paramName + "=" + val;
+                }
+            } else {
+                let re = eval('/(' + paramName + '=)([^&]*)/gi');
+                return oUrl.replace(re, paramName + '=' + val);
+            }
         } else {
             if (!oUrl.includes("?")) {
                 return oUrl + "?" + paramName + "=" + val;
@@ -2070,12 +2089,12 @@
     })
 
     $("#showHasStock").change(function () {
-        if ($(this).prop("checked")){
+        if ($(this).prop("checked")) {
             location.href = replaceAndAddParamVal(location.href.toString(), "hasStock", 1);
-        }else{
+        } else {
             let re = eval('/(hasStock=)([^&]*)/gi');
             let href = location.href.toString().replace(re, '');
-            if (href.endsWith("?")){
+            if (href.endsWith("?")) {
                 href = href.replace("?", "");
             }
             location.href = href;

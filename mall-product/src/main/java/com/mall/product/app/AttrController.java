@@ -2,11 +2,11 @@ package com.mall.product.app;
 
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.R;
+import com.mall.common.vo.AttrRespVo;
+import com.mall.common.vo.AttrVo;
 import com.mall.product.entity.ProductAttrValueEntity;
 import com.mall.product.service.AttrService;
 import com.mall.product.service.ProductAttrValueService;
-import com.mall.product.vo.AttrRespVo;
-import com.mall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
