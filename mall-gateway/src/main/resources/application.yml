@@ -45,4 +45,4 @@ spring:
         - id: mall_host
           uri: lb://mall-product
           predicates:
-            - Host=olinmall.com
+            - Host=olinmall.com,item.olinmall.com
