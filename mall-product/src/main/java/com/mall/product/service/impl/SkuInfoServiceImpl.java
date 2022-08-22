@@ -8,6 +8,7 @@ import com.mall.common.utils.Query;
 import com.mall.product.dao.SkuInfoDao;
 import com.mall.product.entity.SkuInfoEntity;
 import com.mall.product.service.SkuInfoService;
+import com.mall.product.vo.SkuItemVo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -75,6 +76,11 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
     @Override
     public List<SkuInfoEntity> getSkusById(Long spuId) {
         return this.list(new QueryWrapper<SkuInfoEntity>().eq("spu_id", spuId));
+    }
+
+    @Override
+    public SkuItemVo item(Long skuId) {
+        return null;
     }
 
 }
