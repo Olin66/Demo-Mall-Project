@@ -6,10 +6,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.Query;
 import com.mall.product.dao.SkuInfoDao;
+import com.mall.product.entity.SkuImagesEntity;
 import com.mall.product.entity.SkuInfoEntity;
-import com.mall.product.service.SkuInfoService;
+import com.mall.product.entity.SpuInfoDescEntity;
+import com.mall.product.service.*;
 import com.mall.product.vo.SkuItemVo;
+import com.mall.product.vo.pojo.SkuSaleAttr;
+import com.mall.product.vo.pojo.SpuAttrGroup;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,6 +24,18 @@ import java.util.Map;
 
 @Service("skuInfoService")
 public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> implements SkuInfoService {
+
+    @Autowired
+    SkuImagesService skuImagesService;
+
+    @Autowired
+    SpuInfoDescService spuInfoDescService;
+
+    @Autowired
+    AttrGroupService attrGroupService;
+
+    @Autowired
+    SkuSaleAttrValueService skuSaleAttrValueService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -80,7 +97,20 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 
     @Override
     public SkuItemVo item(Long skuId) {
-        return null;
+        SkuItemVo vo = new SkuItemVo();
+        SkuInfoEntity info = getById(skuId);
+        vo.setInfo(info);
+        List<SkuImagesEntity> images = skuImagesService.getImagesBySkuId(skuId);
+        vo.setImages(images);
+        Long spuId = info.getSpuId();
+        SpuInfoDescEntity desc = spuInfoDescService.getById(spuId);
+        vo.setDesc(desc);
+        Long catalogId = info.getCatalogId();
+        List<SpuAttrGroup> groupAttrs = attrGroupService.getAttrGroupWithAttrsBySpuId(spuId, catalogId);
+        vo.setGroupAttrs(groupAttrs);
+        List<SkuSaleAttr> saleAttrs = skuSaleAttrValueService.getSaleAttrsBySpuId(spuId);
+        vo.setSaleAttr(saleAttrs);
+        return vo;
     }
 
 }

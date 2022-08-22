@@ -2,11 +2,9 @@ package com.mall.product.vo.pojo;
 
 import lombok.Data;
 
-import java.util.List;
-
 @Data
-public class SkuItemAttr {
+public class SkuSaleAttr {
     private Long attrId;
     private String attrName;
-    private List<String> attrValues;
+    private String attrValues;
 }

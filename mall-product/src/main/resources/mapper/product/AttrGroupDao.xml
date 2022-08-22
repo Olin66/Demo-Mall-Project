@@ -3,7 +3,6 @@
 
 <mapper namespace="com.mall.product.dao.AttrGroupDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.mall.product.entity.AttrGroupEntity" id="attrGroupMap">
         <result property="attrGroupId" column="attr_group_id"/>
         <result property="attrGroupName" column="attr_group_name"/>
@@ -12,6 +11,29 @@
         <result property="icon" column="icon"/>
         <result property="catelogId" column="catelog_id"/>
     </resultMap>
+
+    <resultMap id="SpuAttrGroup" type="com.mall.product.vo.pojo.SpuAttrGroup">
+        <result property="groupName" column="attr_group_name"/>
+        <collection property="attrs" ofType="com.mall.product.vo.pojo.SpuBaseAttr">
+            <result property="attrName" column="attr_name"/>
+            <result property="attrValue" column="attr_value"/>
+        </collection>
+    </resultMap>
+
+    <select id="getAttrGroupWithAttrsBySpuId" resultMap="SpuAttrGroup">
+        select ppav.spu_id,
+               pag.attr_group_name,
+               pag.attr_group_id,
+               paar.attr_id,
+               ppav.attr_name,
+               ppav.attr_value
+        from pms_attr_group pag
+                 left join pms_attr_attrgroup_relation paar on pag.attr_group_id = paar.attr_group_id
+                 left join pms_attr pa on paar.attr_id = pa.attr_id
+                 left join pms_product_attr_value ppav on pa.attr_id = ppav.attr_id
+        where pag.catelog_id = #{catalogId}
+          and ppav.spu_id = #{spuId};
+    </select>
 
 
 </mapper>

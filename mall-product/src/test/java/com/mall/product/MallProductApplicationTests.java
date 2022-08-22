@@ -2,7 +2,11 @@ package com.mall.product;
 
 //import com.aliyun.oss.*;
 
+import com.mall.product.dao.AttrGroupDao;
 import com.mall.product.service.CategoryService;
+import com.mall.product.service.SkuSaleAttrValueService;
+import com.mall.product.vo.pojo.SkuSaleAttr;
+import com.mall.product.vo.pojo.SpuAttrGroup;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @SpringBootTest
@@ -19,10 +23,22 @@ class MallProductApplicationTests {
     @Autowired
     CategoryService categoryService;
 
+    @Autowired
+    AttrGroupDao attrGroupDao;
+
+    @Autowired
+    SkuSaleAttrValueService skuSaleAttrValueService;
+
     @Test
-    public void test() {
-        Long[] path = categoryService.getCatelogPath(225L);
-        System.out.println(Arrays.toString(path));
+    public void test1() {
+        List<SpuAttrGroup> groups = attrGroupDao.getAttrGroupWithAttrsBySpuId(100L, 225L);
+        System.out.println(groups);
+    }
+
+    @Test
+    public void test2(){
+        List<SkuSaleAttr> attrs = skuSaleAttrValueService.getSaleAttrsBySpuId(13L);
+        System.out.println(attrs);
     }
 
     @Autowired
