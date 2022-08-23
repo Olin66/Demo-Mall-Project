@@ -12,6 +12,7 @@ import java.util.List;
 @Data
 public class SkuItemVo {
     SkuInfoEntity info;
+    Boolean hasStock = true;
     List<SkuImagesEntity> images;
     List<SkuSaleAttr> saleAttr;
     List<SpuAttrGroup> groupAttrs;
