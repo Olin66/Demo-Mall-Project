@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 
 
 @Service("skuInfoService")
@@ -36,6 +39,9 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 
     @Autowired
     SkuSaleAttrValueService skuSaleAttrValueService;
+
+    @Autowired
+    ThreadPoolExecutor executor;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -69,16 +75,16 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
         }
         String min = (String) params.get("min");
         String max = (String) params.get("max");
-        if (!StringUtils.isEmpty(min)){
+        if (!StringUtils.isEmpty(min)) {
             wrapper.ge("price", min);
         }
-        if (!StringUtils.isEmpty(max)){
+        if (!StringUtils.isEmpty(max)) {
             try {
                 BigDecimal bigDecimal = new BigDecimal(max);
-                if(bigDecimal.compareTo(BigDecimal.ZERO)>0) {
+                if (bigDecimal.compareTo(BigDecimal.ZERO) > 0) {
                     wrapper.le("price", max);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("{}", e);
             }
         }
@@ -96,20 +102,31 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
     }
 
     @Override
-    public SkuItemVo item(Long skuId) {
+    public SkuItemVo item(Long skuId) throws ExecutionException, InterruptedException {
         SkuItemVo vo = new SkuItemVo();
-        SkuInfoEntity info = getById(skuId);
-        vo.setInfo(info);
-        List<SkuImagesEntity> images = skuImagesService.getImagesBySkuId(skuId);
-        vo.setImages(images);
-        Long spuId = info.getSpuId();
-        SpuInfoDescEntity desc = spuInfoDescService.getById(spuId);
-        vo.setDesc(desc);
-        Long catalogId = info.getCatalogId();
-        List<SpuAttrGroup> groupAttrs = attrGroupService.getAttrGroupWithAttrsBySpuId(spuId, catalogId);
-        vo.setGroupAttrs(groupAttrs);
-        List<SkuSaleAttr> saleAttrs = skuSaleAttrValueService.getSaleAttrsBySpuId(spuId);
-        vo.setSaleAttr(saleAttrs);
+        CompletableFuture<SkuInfoEntity> infoFuture = CompletableFuture.supplyAsync(() -> {
+            SkuInfoEntity info = getById(skuId);
+            vo.setInfo(info);
+            return info;
+        }, executor);
+        CompletableFuture<Void> saleAttrFuture = infoFuture.thenAcceptAsync(res -> {
+            List<SkuSaleAttr> saleAttrs = skuSaleAttrValueService.getSaleAttrsBySpuId(res.getSpuId());
+            vo.setSaleAttr(saleAttrs);
+        }, executor);
+        CompletableFuture<Void> descFuture = infoFuture.thenAcceptAsync(res -> {
+            SpuInfoDescEntity desc = spuInfoDescService.getById(res.getSpuId());
+            vo.setDesc(desc);
+        }, executor);
+        CompletableFuture<Void> baseAttrFuture = infoFuture.thenAcceptAsync(res -> {
+            List<SpuAttrGroup> groupAttrs =
+                    attrGroupService.getAttrGroupWithAttrsBySpuId(res.getSpuId(), res.getCatalogId());
+            vo.setGroupAttrs(groupAttrs);
+        }, executor);
+        CompletableFuture<Void> imageFuture = CompletableFuture.runAsync(() -> {
+            List<SkuImagesEntity> images = skuImagesService.getImagesBySkuId(skuId);
+            vo.setImages(images);
+        }, executor);
+        CompletableFuture.allOf(saleAttrFuture, descFuture, baseAttrFuture, imageFuture).get();
         return vo;
     }
 
