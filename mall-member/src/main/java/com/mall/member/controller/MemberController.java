@@ -1,22 +1,20 @@
 package com.mall.member.controller;
 
+import com.mall.common.exception.ExceptionCodeEnum;
+import com.mall.common.utils.PageUtils;
+import com.mall.common.utils.R;
+import com.mall.member.entity.MemberEntity;
+import com.mall.member.exception.PhoneExistedException;
+import com.mall.member.exception.UsernameExistedException;
+import com.mall.member.feign.CouponFeignService;
+import com.mall.member.service.MemberService;
+import com.mall.member.vo.MemberRegisterVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
-
-import com.mall.member.feign.CouponFeignService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.mall.member.entity.MemberEntity;
-import com.mall.member.service.MemberService;
-import com.mall.common.utils.PageUtils;
-import com.mall.common.utils.R;
-
 
 
 /**
@@ -35,8 +33,22 @@ public class MemberController {
     @Autowired
     CouponFeignService couponFeignService;
 
+    @PostMapping("/register")
+    public R register(@RequestBody MemberRegisterVo vo) {
+        try {
+            memberService.register(vo);
+        } catch (PhoneExistedException e) {
+            return R.error(ExceptionCodeEnum.PHONE_EXISTED_EXCEPTION.getCode(),
+                    ExceptionCodeEnum.PHONE_EXISTED_EXCEPTION.getMessage());
+        } catch (UsernameExistedException e) {
+            R.error(ExceptionCodeEnum.USERNAME_EXISTED_EXCEPTION.getCode(),
+                    ExceptionCodeEnum.USERNAME_EXISTED_EXCEPTION.getMessage());
+        }
+        return R.ok();
+    }
+
     @RequestMapping("/coupons")
-    public R test(){
+    public R test() {
         MemberEntity memberEntity = new MemberEntity();
         memberEntity.setNickname("Zhang San");
         R memberCoupons = couponFeignService.memberCoupons();
@@ -48,7 +60,7 @@ public class MemberController {
      */
     @RequestMapping("/list")
     //@RequiresPermissions("member:member:list")
-    public R list(@RequestParam Map<String, Object> params){
+    public R list(@RequestParam Map<String, Object> params) {
         PageUtils page = memberService.queryPage(params);
 
         return R.ok().put("page", page);
@@ -60,8 +72,8 @@ public class MemberController {
      */
     @RequestMapping("/info/{id}")
     //@RequiresPermissions("member:member:info")
-    public R info(@PathVariable("id") Long id){
-		MemberEntity member = memberService.getById(id);
+    public R info(@PathVariable("id") Long id) {
+        MemberEntity member = memberService.getById(id);
 
         return R.ok().put("member", member);
     }
@@ -71,8 +83,8 @@ public class MemberController {
      */
     @RequestMapping("/save")
     //@RequiresPermissions("member:member:save")
-    public R save(@RequestBody MemberEntity member){
-		memberService.save(member);
+    public R save(@RequestBody MemberEntity member) {
+        memberService.save(member);
 
         return R.ok();
     }
@@ -82,8 +94,8 @@ public class MemberController {
      */
     @RequestMapping("/update")
     //@RequiresPermissions("member:member:update")
-    public R update(@RequestBody MemberEntity member){
-		memberService.updateById(member);
+    public R update(@RequestBody MemberEntity member) {
+        memberService.updateById(member);
 
         return R.ok();
     }
@@ -93,8 +105,8 @@ public class MemberController {
      */
     @RequestMapping("/delete")
     //@RequiresPermissions("member:member:delete")
-    public R delete(@RequestBody Long[] ids){
-		memberService.removeByIds(Arrays.asList(ids));
+    public R delete(@RequestBody Long[] ids) {
+        memberService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
     }
