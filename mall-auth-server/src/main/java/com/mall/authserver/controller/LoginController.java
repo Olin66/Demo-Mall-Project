@@ -1,5 +1,6 @@
 package com.mall.authserver.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.mall.authserver.feign.MemberFeignService;
 import com.mall.authserver.feign.ThirdPartyFeignService;
 import com.mall.authserver.vo.UserLoginVo;
@@ -7,6 +8,7 @@ import com.mall.authserver.vo.UserRegisterVo;
 import com.mall.common.constant.AuthConstant;
 import com.mall.common.exception.ExceptionCodeEnum;
 import com.mall.common.utils.R;
+import com.mall.common.vo.MemberRespVo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -92,9 +95,12 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(UserLoginVo vo, RedirectAttributes redirectAttributes) {
+    public String login(UserLoginVo vo, RedirectAttributes redirectAttributes, HttpSession session) {
         R r = memberFeignService.login(vo);
         if (r.getCode() == 0){
+            String s = JSON.toJSONString(r.get("data"));
+            MemberRespVo data = JSON.parseObject(s, MemberRespVo.class);
+            session.setAttribute("user", data);
             return "redirect:http://olinmall.com";
         }else {
             Map<String, String> errors = new HashMap<>();

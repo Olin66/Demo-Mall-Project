@@ -34,10 +34,15 @@
 #    host: 192.168.56.10
 #    port: 6379
 
-spring:
-  cache:
-    type: redis
-    redis:
-      time-to-live: 3600000
-      key-prefix: CACHE_
-      cache-null-values: true
+#spring:
+#  cache:
+#    type: redis
+#    redis:
+#      time-to-live: 3600000
+#      key-prefix: CACHE_
+#      cache-null-values: true
+#  session:
+#    store-type: redis
+#  redis:
+#    host: 192.168.56.10
+#    port: 6379

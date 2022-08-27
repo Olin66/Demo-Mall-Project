@@ -56,7 +56,7 @@ public class MemberController {
     public R login(@RequestBody GitHubUserVo vo) {
         MemberEntity member = memberService.login(vo);
         if (member != null) {
-            return R.ok();
+            return R.ok().put("data", member);
         } else {
             return R.error(ExceptionCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION.getCode(),
                     ExceptionCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION.getMessage());
