@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
     <link rel="stylesheet" type="text/css" href="/static/login/JD_sass/JD1.css"/>
@@ -57,29 +57,33 @@
                 <div></div>
                 请输入账户名和密码
             </div>
-            <ul>
-                <li class="top_1">
-                    <img src="/static/login/JD_img/user_03.png" class="err_img1"/>
-                    <input type="text" placeholder=" 邮箱/用户名/已验证手机" class="user"/>
-                </li>
-                <li>
-                    <img src="/static/login/JD_img/user_06.png" class="err_img2"/>
-                    <input type="password" placeholder=" 密码" class="password"/>
-                </li>
-                <li class="bri">
-                    <a href="/static/login/">忘记密码</a>
-                </li>
-                <li class="ent">
-                    <button class="btn2"><a class="a">登 &nbsp; &nbsp;录</a></button>
-                </li>
-            </ul>
+            <form action="/login" method="post">
+                <div style="color:red;"
+                     th:text="${errors!=null?(#maps.containsKey(errors, 'msg')?errors.msg:''):''}"></div>
+                <ul>
+                    <li class="top_1">
+                        <img src="/static/login/JD_img/user_03.png" class="err_img1"/>
+                        <input type="text" name="account" placeholder=" 邮箱/用户名/已验证手机" class="user"/>
+                    </li>
+                    <li>
+                        <img src="/static/login/JD_img/user_06.png" class="err_img2"/>
+                        <input type="password" name="password" placeholder=" 密码" class="password"/>
+                    </li>
+                    <li class="bri">
+                        <a href="/static/login/">忘记密码</a>
+                    </li>
+                    <li class="ent">
+                        <button class="btn2" type="submit"><a>登 &nbsp; &nbsp;录</a></button>
+                    </li>
+                </ul>
+            </form>
         </div>
         <div class="si_out">
             <ul>
                 <li>
-                    <a href="/static/login/#">
-                        <img src="/static/login/JD_img/qq.png"/>
-                        <span>QQ</span>
+                    <a href="https://github.com/login/oauth/authorize?client_id=e03abe42031b0b388453&redirect_uri=http://auth.olinmall.com/oauth2/github/success">
+                        <img style="width: 18px; height: 18px;" src="/static/login/JD_img/github.png"/>
+                        <span>GitHub</span>
                     </a>
                 </li>
                 <li class="f4"> |</li>
@@ -92,8 +96,7 @@
             </ul>
             <h5 class="rig">
                 <img src="/static/login/JD_img/4de5019d2404d347897dee637895d02b_25.png"/>
-                <span><a
-                        href="http://auth.olinmall.com/reg.html">立即注册</a></span>
+                <span><a href="http://auth.olinmall.com/reg.html">立即注册</a></span>
             </h5>
         </div>
     </div>

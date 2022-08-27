@@ -2,6 +2,7 @@ package com.mall.authserver.controller;
 
 import com.mall.authserver.feign.MemberFeignService;
 import com.mall.authserver.feign.ThirdPartyFeignService;
+import com.mall.authserver.vo.UserLoginVo;
 import com.mall.authserver.vo.UserRegisterVo;
 import com.mall.common.constant.AuthConstant;
 import com.mall.common.exception.ExceptionCodeEnum;
@@ -88,5 +89,18 @@ public class LoginController {
             return "redirect:http://auth.olinmall.com/reg.html";
         }
         return "redirect:http://auth.olinmall.com/login.html";
+    }
+
+    @PostMapping("/login")
+    public String login(UserLoginVo vo, RedirectAttributes redirectAttributes) {
+        R r = memberFeignService.login(vo);
+        if (r.getCode() == 0){
+            return "redirect:http://olinmall.com";
+        }else {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("msg", r.get("msg").toString());
+            redirectAttributes.addFlashAttribute("errors", errors);
+            return "redirect:http://auth.olinmall.com/login.html";
+        }
     }
 }

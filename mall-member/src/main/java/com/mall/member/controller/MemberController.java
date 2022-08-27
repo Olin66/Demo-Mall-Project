@@ -8,6 +8,8 @@ import com.mall.member.exception.PhoneExistedException;
 import com.mall.member.exception.UsernameExistedException;
 import com.mall.member.feign.CouponFeignService;
 import com.mall.member.service.MemberService;
+import com.mall.member.vo.GitHubUserVo;
+import com.mall.member.vo.MemberLoginVo;
 import com.mall.member.vo.MemberRegisterVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +18,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
-
-/**
- * 会员
- *
- * @author SnowCharm
- * @email 619022098@qq.com
- * @date 2022-07-10 19:31:00
- */
 @RestController
 @RequestMapping("member/member")
 public class MemberController {
@@ -45,6 +39,28 @@ public class MemberController {
                     ExceptionCodeEnum.USERNAME_EXISTED_EXCEPTION.getMessage());
         }
         return R.ok();
+    }
+
+    @PostMapping("/login")
+    public R login(@RequestBody MemberLoginVo vo) {
+        MemberEntity member = memberService.login(vo);
+        if (member != null) {
+            return R.ok().put("data", member);
+        } else {
+            return R.error(ExceptionCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION.getCode(),
+                    ExceptionCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION.getMessage());
+        }
+    }
+
+    @PostMapping("/oauth2/login")
+    public R login(@RequestBody GitHubUserVo vo) {
+        MemberEntity member = memberService.login(vo);
+        if (member != null) {
+            return R.ok();
+        } else {
+            return R.error(ExceptionCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION.getCode(),
+                    ExceptionCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION.getMessage());
+        }
     }
 
     @RequestMapping("/coupons")

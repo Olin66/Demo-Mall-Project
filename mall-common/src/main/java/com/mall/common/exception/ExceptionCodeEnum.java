@@ -6,7 +6,8 @@ public enum ExceptionCodeEnum {
     SMS_CODE_EXCEPTION(10002, "短信验证码频率过高"),
     PRODUCT_UP_EXCEPTION(11000, "商品上架异常"),
     USERNAME_EXISTED_EXCEPTION(15001, "用户名已经存在"),
-    PHONE_EXISTED_EXCEPTION(15002, "手机号已经存在");
+    PHONE_EXISTED_EXCEPTION(15002, "手机号已经存在"),
+    LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION(15003, "登陆账号或密码错误");
 
 
     private final int code;

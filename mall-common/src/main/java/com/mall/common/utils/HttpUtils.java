@@ -23,6 +23,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -32,7 +33,7 @@ import java.util.Map;
 
 public class HttpUtils {
 
-    public static HttpResponse doGet(String host, String path, String method,
+    public static HttpResponse doGet(String host, String path,
                                      Map<String, String> headers,
                                      Map<String, String> queries)
             throws Exception {
@@ -46,7 +47,7 @@ public class HttpUtils {
         return httpClient.execute(request);
     }
 
-    public static HttpResponse doPost(String host, String path, String method,
+    public static HttpResponse doPost(String host, String path,
                                       Map<String, String> headers,
                                       Map<String, String> queries,
                                       Map<String, String> bodies)
@@ -72,7 +73,7 @@ public class HttpUtils {
         return httpClient.execute(request);
     }
 
-    public static HttpResponse doPost(String host, String path, String method,
+    public static HttpResponse doPost(String host, String path,
                                       Map<String, String> headers,
                                       Map<String, String> queries,
                                       String body)
@@ -91,7 +92,7 @@ public class HttpUtils {
         return httpClient.execute(request);
     }
 
-    public static HttpResponse doPost(String host, String path, String method,
+    public static HttpResponse doPost(String host, String path,
                                       Map<String, String> headers,
                                       Map<String, String> queries,
                                       byte[] body)
@@ -110,7 +111,7 @@ public class HttpUtils {
         return httpClient.execute(request);
     }
 
-    public static HttpResponse doPut(String host, String path, String method,
+    public static HttpResponse doPut(String host, String path,
                                      Map<String, String> headers,
                                      Map<String, String> queries,
                                      String body)
@@ -129,7 +130,7 @@ public class HttpUtils {
         return httpClient.execute(request);
     }
 
-    public static HttpResponse doPut(String host, String path, String method,
+    public static HttpResponse doPut(String host, String path,
                                      Map<String, String> headers,
                                      Map<String, String> queries,
                                      byte[] body)
@@ -148,7 +149,7 @@ public class HttpUtils {
         return httpClient.execute(request);
     }
 
-    public static HttpResponse doDelete(String host, String path, String method,
+    public static HttpResponse doDelete(String host, String path,
                                         Map<String, String> headers,
                                         Map<String, String> queries)
             throws Exception {
@@ -181,7 +182,7 @@ public class HttpUtils {
                     sbQuery.append(query.getKey());
                     if (!StringUtils.isBlank(query.getValue())) {
                         sbQuery.append("=");
-                        sbQuery.append(URLEncoder.encode(query.getValue(), "utf-8"));
+                        sbQuery.append(URLEncoder.encode(query.getValue(), StandardCharsets.UTF_8));
                     }
                 }
             }
@@ -224,9 +225,7 @@ public class HttpUtils {
             ClientConnectionManager ccm = httpClient.getConnectionManager();
             SchemeRegistry registry = ccm.getSchemeRegistry();
             registry.register(new Scheme("https", 443, ssf));
-        } catch (KeyManagementException ex) {
-            throw new RuntimeException(ex);
-        } catch (NoSuchAlgorithmException ex) {
+        } catch (KeyManagementException | NoSuchAlgorithmException ex) {
             throw new RuntimeException(ex);
         }
     }
