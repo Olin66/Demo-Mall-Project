@@ -1,4 +1,4 @@
-package com.mall.authserver.config;
+package com.mall.search.config;
 
 import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
 import org.springframework.context.annotation.Bean;

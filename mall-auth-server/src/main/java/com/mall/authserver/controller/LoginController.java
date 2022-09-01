@@ -59,6 +59,15 @@ public class LoginController {
         return R.ok();
     }
 
+    @GetMapping("/login.html")
+    public String loginPage(HttpSession session){
+        if (session.getAttribute(AuthConstant.LOGIN_USER) == null) {
+            return "login";
+        } else {
+            return "redirect:http://olinmall.com";
+        }
+    }
+
     @PostMapping("/register")
     public String register(@Valid UserRegisterVo vo, BindingResult result, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
@@ -100,7 +109,7 @@ public class LoginController {
         if (r.getCode() == 0){
             String s = JSON.toJSONString(r.get("data"));
             MemberRespVo data = JSON.parseObject(s, MemberRespVo.class);
-            session.setAttribute("user", data);
+            session.setAttribute(AuthConstant.LOGIN_USER, data);
             return "redirect:http://olinmall.com";
         }else {
             Map<String, String> errors = new HashMap<>();

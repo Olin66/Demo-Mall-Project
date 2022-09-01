@@ -3,6 +3,7 @@ package com.mall.authserver.controller;
 import com.alibaba.fastjson.JSON;
 import com.mall.authserver.feign.MemberFeignService;
 import com.mall.authserver.vo.GitHubUserVo;
+import com.mall.common.constant.AuthConstant;
 import com.mall.common.utils.HttpUtils;
 import com.mall.common.utils.R;
 import com.mall.common.vo.MemberRespVo;
@@ -46,7 +47,7 @@ public class OAuth2Controller {
             if (r.getCode() == 0) {
                 String s = JSON.toJSONString(r.get("data"));
                 MemberRespVo vo = JSON.parseObject(s, MemberRespVo.class);
-                session.setAttribute("user", vo);
+                session.setAttribute(AuthConstant.LOGIN_USER, vo);
                 return "redirect:http://olinmall.com";
             } else {
                 return "redirect:http://auth.olinmall.com/login.html";
