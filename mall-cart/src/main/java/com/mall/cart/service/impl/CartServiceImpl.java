@@ -34,7 +34,7 @@ public class CartServiceImpl implements CartService {
     ThreadPoolExecutor executor;
 
     @Override
-    public CartItemVo addToCart(Long skuId, Integer num) throws ExecutionException, InterruptedException {
+    public void addToCart(Long skuId, Integer num) throws ExecutionException, InterruptedException {
         CartItemVo vo;
         BoundHashOperations<String, Object, Object> operations = getCartOps();
         String result = (String) operations.get(skuId.toString());
@@ -64,7 +64,13 @@ public class CartServiceImpl implements CartService {
             String s = JSON.toJSONString(vo);
             operations.put(skuId.toString(), s);
         }
-        return vo;
+    }
+
+    @Override
+    public CartItemVo getCartItem(Long skuId) {
+        BoundHashOperations<String, Object, Object> operations = getCartOps();
+        String o = (String) operations.get(skuId.toString());
+        return JSONObject.parseObject(o, CartItemVo.class);
     }
 
     private BoundHashOperations<String, Object, Object> getCartOps() {
