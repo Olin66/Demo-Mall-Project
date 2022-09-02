@@ -10,6 +10,7 @@ import com.mall.cart.vo.SkuInfoVo;
 import com.mall.common.constant.CartConstant;
 import com.mall.common.to.UserInfoTo;
 import com.mall.common.utils.R;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,26 +35,35 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemVo addToCart(Long skuId, Integer num) throws ExecutionException, InterruptedException {
-        CartItemVo vo = new CartItemVo();
+        CartItemVo vo;
         BoundHashOperations<String, Object, Object> operations = getCartOps();
-        CompletableFuture<Void> skuInfo = CompletableFuture.runAsync(() -> {
-            R r = productFeignService.info(skuId);
-            String s = JSON.toJSONString(r.get("skuInfo"));
-            SkuInfoVo data = JSONObject.parseObject(s, SkuInfoVo.class);
-            vo.setCheck(true);
-            vo.setCount(num);
-            vo.setSkuId(skuId);
-            vo.setImage(data.getSkuDefaultImg());
-            vo.setTitle(data.getSkuTitle());
-            vo.setPrice(data.getPrice());
-        }, executor);
-        CompletableFuture<Void> skuSaleAttr = CompletableFuture.runAsync(() -> {
-            List<String> values = productFeignService.getSkuSakeAttrValues(skuId);
-            vo.setSkuAttr(values);
-        }, executor);
-        CompletableFuture.allOf(skuInfo, skuSaleAttr).get();
-        String s = JSON.toJSONString(vo);
-        operations.put(skuId.toString(), s);
+        String result = (String) operations.get(skuId.toString());
+        if (StringUtils.isEmpty(result)){
+            vo = new CartItemVo();
+            CompletableFuture<Void> skuInfo = CompletableFuture.runAsync(() -> {
+                R r = productFeignService.info(skuId);
+                String s = JSON.toJSONString(r.get("skuInfo"));
+                SkuInfoVo data = JSONObject.parseObject(s, SkuInfoVo.class);
+                vo.setCheck(true);
+                vo.setCount(num);
+                vo.setSkuId(skuId);
+                vo.setImage(data.getSkuDefaultImg());
+                vo.setTitle(data.getSkuTitle());
+                vo.setPrice(data.getPrice());
+            }, executor);
+            CompletableFuture<Void> skuSaleAttr = CompletableFuture.runAsync(() -> {
+                List<String> values = productFeignService.getSkuSakeAttrValues(skuId);
+                vo.setSkuAttr(values);
+            }, executor);
+            CompletableFuture.allOf(skuInfo, skuSaleAttr).get();
+            String s = JSON.toJSONString(vo);
+            operations.put(skuId.toString(), s);
+        } else {
+            vo = JSONObject.parseObject(result, CartItemVo.class);
+            vo.setCount(vo.getCount() + num);
+            String s = JSON.toJSONString(vo);
+            operations.put(skuId.toString(), s);
+        }
         return vo;
     }
 
