@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
@@ -24,6 +25,11 @@ import java.util.Map;
 public class SkuSaleAttrValueController {
     @Autowired
     private SkuSaleAttrValueService skuSaleAttrValueService;
+
+    @GetMapping("/stringlist/{skuId}")
+    public List<String> getSkuSakeAttrValues(@PathVariable("skuId") Long skuId){
+        return skuSaleAttrValueService.getSkuSakeAttrValuesAsStringList(skuId);
+    }
 
     /**
      * 列表

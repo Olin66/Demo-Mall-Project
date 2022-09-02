@@ -52,7 +52,8 @@
                         <li><a href="/static/item/javascript:;">新疆</a></li>
                         <li><a href="/static/item/javascript:;">港澳</a></li>
                         <li><a href="/static/item/javascript:;">台湾</a></li>
-                        <li><a href="/static/item/javascript:;">钓鱼岛</a></li>`
+                        <li><a href="/static/item/javascript:;">钓鱼岛</a></li>
+                        `
                         <li><a href="/static/item/javascript:;">海外</a></li>
                     </ol>
                 </li>
@@ -60,11 +61,13 @@
             <ul class="header_ul_right">
                 <li style="border: 0;">
                     <a th:if="${session.loginUser!=null}">欢迎：[[${session.loginUser==null?'':session.loginUser.nickname}]]</a>
-                    <a href="http://auth.olinmall.com/login.html" th:if="${session.loginUser==null}" class="aa">你好，请登录</a>
+                    <a href="http://auth.olinmall.com/login.html" th:if="${session.loginUser==null}"
+                       class="aa">你好，请登录</a>
                 </li>
                 <li>
                     <a th:if="${session.loginUser==null}" href="http://auth.olinmall.com/reg.html" style="color: red;">免费注册</a>
-                    |</li>
+                    |
+                </li>
                 <li><a href="/static/item/javascript:;" class="aa">我的订单</a> |</li>
                 <li class="jingdong"><a href="/static/item/javascript:;">我的京东</a><span
                         class="glyphicon glyphicon-menu-down">|</span>
@@ -626,9 +629,8 @@
 
                 <div class="box-btns clear">
                     <div class="box-btns-one">
-                        <input type="text" name="" id="" value="1"/>
+                        <input type="text" name="" id="numInput" value="1"/>
                         <div class="box-btns-one1">
-
                             <div>
                                 <button id="jia">
                                     +
@@ -639,11 +641,10 @@
                                     -
                                 </button>
                             </div>
-
                         </div>
                     </div>
                     <div class="box-btns-two">
-                        <a href="http://cart.olinmall.com/addToCart">
+                        <a href="#" id="addToCart" th:attr="skuId=${item.info.skuId}">
                             加入购物车
                         </a>
                     </div>
@@ -1288,6 +1289,13 @@
     $(function () {
         $(".sku_attr_value").parent().css({"border": "solid 1px #CCC"});
         $("a[class='sku_attr_value checked']").parent().css({"border": "solid 1px red"});
+    })
+    $("#addToCart").click(function () {
+        let num = $("#numInput").val();
+        let skuId = $(this).attr("skuId");
+        location.href = "http://cart.olinmall.com/addToCart?skuId=" + skuId + "&num=" + num;
+
+        return false;
     })
 </script>
 

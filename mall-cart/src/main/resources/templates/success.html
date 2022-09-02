@@ -25,12 +25,13 @@
 
         <ul class="hd_wrap_right">
             <li class="forel">
-                <a href="/static/cart/javascript:;" class="link_login">你好,请登录</a>&nbsp;
-                <a href="/static/cart/javascript:;" class="link_regist">免费注册</a>
+                <a th:if="${session.loginUser!=null}">欢迎：[[${session.loginUser==null?'':session.loginUser.nickname}]]</a>
+                <a href="http://auth.olinmall.com/login.html" th:if="${session.loginUser==null}" class="link_login">你好,请登录</a>&nbsp;
+                <a th:if="${session.loginUser==null}" href="http://auth.olinmall.com/reg.html" class="link_regist">免费注册</a>
             </li>
             <li class="spacer"></li>
             <li>
-                <a href="/static/cart/javascript:;">我的订单</a>
+                <a href="http://cart.olinmall.com/cart.html">我的订单</a>
             </li>
         </ul>
 
@@ -65,15 +66,15 @@
                             <h3 class="ftx-02">商品已成功加入购物车</h3></div>
                         <div class="p-item">
                             <div class="p-img">
-                                <a href="/static/cart/javascript:;" target="_blank"><img
-                                        style="height: 60px;width:60px;" src="/static/cart/img/shop1.jpg"></a>
+                                <a target="_blank"><img
+                                        style="height: 60px;width:60px;" th:src="${item.getImage()}"></a>
                             </div>
                             <div class="p-info">
                                 <div class="p-name">
-                                    <a th:href="/static/cart/'http://item.gmall.com/'+${skuInfo?.id}+'.html'"
-                                       th:text="${skuInfo?.skuName}">TCL 55A950C 55英寸32核人工智能 HDR曲面超薄4K电视金属机身（枪色）</a>
+                                    <a th:href="'http://item.olinmall.com/'+${item.getSkuId()}+'.html'"
+                                       th:text="${item.getTitle()}"></a>
                                 </div>
-                                <div class="p-extra"><span class="txt" th:text="'数量：'+${skuNum}">  数量：1</span></div>
+                                <div class="p-extra"><span class="txt" th:text="'数量：'+${item.getCount()}"></span></div>
                             </div>
                             <div class="clr"></div>
                         </div>
