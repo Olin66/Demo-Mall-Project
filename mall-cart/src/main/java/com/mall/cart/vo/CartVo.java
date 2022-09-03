@@ -8,7 +8,7 @@ public class CartVo {
     private Integer countNum;
     private Integer countType;
     private BigDecimal totalAmount;
-    private BigDecimal reduce = BigDecimal.ZERO;
+    private BigDecimal reduce = new BigDecimal(0);
 
     public List<CartItemVo> getItems() {
         return items;
@@ -44,6 +44,7 @@ public class CartVo {
             }
         }
         amount = amount.subtract(getReduce());
+        this.totalAmount = amount;
         return amount;
     }
 
