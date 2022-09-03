@@ -123,7 +123,7 @@
                                                             th:text="'￥' + ${#numbers.formatDecimal(item.totalPrice, 3, 2)}"></p>
                             </li>
                             <li>
-                                <p>删除</p>
+                                <p id="deleteItemBtn" th:attr="skuId=${item.skuId}">删除</p>
 
                             </li>
                         </ol>
@@ -178,7 +178,7 @@
         </dl>
     </div>
     <div>
-        <button type="button">删除</button>
+        <button type="button" onclick="deleteItem()">删除</button>
 
     </div>
 </div>
@@ -782,5 +782,12 @@
         let num = $(this).parent("p").find(".countOpsNum").text();
         location.href = "http://cart.olinmall.com/countItem?skuId=" + skuId + "&num=" + num;
     })
+    let delSkuId;
+    $("#deleteItemBtn").click(function () {
+        delSkuId = $(this).attr("skuId");
+    })
+    function deleteItem() {
+        location.href = "http://cart.olinmall.com/deleteItem?skuId=" + delSkuId;
+    }
 </script>
 </html>

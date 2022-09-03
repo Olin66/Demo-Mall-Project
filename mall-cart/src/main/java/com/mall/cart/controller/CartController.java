@@ -18,6 +18,12 @@ public class CartController {
     @Autowired
     CartService cartService;
 
+    @GetMapping("/deleteItem")
+    public String deleteItem(@RequestParam("skuId") Long skuId) {
+        cartService.deleteItem(skuId);
+        return "redirect:http://cart.olinmall.com/cart.html";
+    }
+
     @GetMapping("/countItem")
     public String countItem(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num) {
         cartService.countItem(skuId, num);

@@ -118,6 +118,12 @@ public class CartServiceImpl implements CartService {
         operations.put(skuId.toString(), json);
     }
 
+    @Override
+    public void deleteItem(Long skuId) {
+        BoundHashOperations<String, Object, Object> operations = getCartOps();
+        operations.delete(skuId.toString());
+    }
+
     private BoundHashOperations<String, Object, Object> getCartOps() {
         UserInfoTo user = CartInterceptor.threadLocal.get();
         String cartKey;
