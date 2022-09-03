@@ -25,9 +25,11 @@
             <ul class="header-right">
                 <li>
                     <a th:if="${session.loginUser!=null}">欢迎：[[${session.loginUser==null?'':session.loginUser.nickname}]]</a>
-                    <a href="http://auth.olinmall.com/login.html" th:if="${session==null||session.loginUser==null}">请登录</a>
+                    <a href="http://auth.olinmall.com/login.html"
+                       th:if="${session==null||session.loginUser==null}">请登录</a>
                 </li>
-                <li><a th:if="${session.loginUser==null}" href="http://auth.olinmall.com/reg.html" style="color: red;">免费注册</a></li>
+                <li><a th:if="${session.loginUser==null}" href="http://auth.olinmall.com/reg.html" style="color: red;">免费注册</a>
+                </li>
                 <li class="spacer"></li>
                 <li><a href="/static/cart/">我的订单</a></li>
                 <li class="spacer"></li>
@@ -91,7 +93,8 @@
                     </div>
                     <div>
                         <ol>
-                            <li><input type="checkbox" class="check" th:checked="${item.check}"></li>
+                            <li><input type="checkbox" th:attr="skuId=${item.skuId}" class="itemCheck"
+                                       th:checked="${item.check}"></li>
                             <li>
                                 <dt><img th:src="${item.image}" alt=""></dt>
                                 <dd style="width: 300px;">
@@ -109,10 +112,10 @@
 
                             </li>
                             <li>
-                                <p>
-                                    <span>-</span>
-                                    <span th:text="${item.count}">5</span>
-                                    <span>+</span>
+                                <p th:attr="skuid=${item.skuId}">
+                                    <span class="countOps">-</span>
+                                    <span class="countOpsNum" th:text="${item.count}"></span>
+                                    <span class="countOps">+</span>
                                 </p>
 
                             </li>
@@ -767,6 +770,17 @@
         $(this).children("p").children("img").attr("src", "img/one_mian_gwc2.png")
     }).mouseout(function () {
         $(this).children("p").children("img").attr("src", "img/one_mian_gwc1.png")
+    })
+
+    $(".itemCheck").click(function () {
+        let skuId = $(this).attr("skuId");
+        let check = $(this).prop("checked");
+        location.href = "http://cart.olinmall.com/checkItem?skuId=" + skuId + "&check=" + (check ? 1 : 0);
+    })
+    $(".countOps").click(function () {
+        let skuId = $(this).parent("p").attr("skuId");
+        let num = $(this).parent("p").find(".countOpsNum").text();
+        location.href = "http://cart.olinmall.com/countItem?skuId=" + skuId + "&num=" + num;
     })
 </script>
 </html>

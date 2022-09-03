@@ -18,6 +18,18 @@ public class CartController {
     @Autowired
     CartService cartService;
 
+    @GetMapping("/countItem")
+    public String countItem(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num) {
+        cartService.countItem(skuId, num);
+        return "redirect:http://cart.olinmall.com/cart.html";
+    }
+
+    @GetMapping("/checkItem")
+    public String checkItem(@RequestParam("skuId") Long skuId, @RequestParam("check") Integer check) {
+        cartService.checkItem(skuId, check);
+        return "redirect:http://cart.olinmall.com/cart.html";
+    }
+
     @GetMapping("/cart.html")
     public String cartListPage(Model model) throws ExecutionException, InterruptedException {
         CartVo cart = cartService.getCart();
@@ -36,7 +48,7 @@ public class CartController {
     }
 
     @GetMapping("/addToCartSuccess.html")
-    public String addToCartSuccessPage(@RequestParam("skuId") Long skuId, Model model){
+    public String addToCartSuccessPage(@RequestParam("skuId") Long skuId, Model model) {
         CartItemVo vo = cartService.getCartItem(skuId);
         model.addAttribute("item", vo);
         return "success";
