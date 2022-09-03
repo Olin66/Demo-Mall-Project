@@ -1,19 +1,14 @@
-package com.mall.order.controller;
+package com.mall.order.app;
+
+import com.mall.common.utils.PageUtils;
+import com.mall.common.utils.R;
+import com.mall.order.entity.OrderEntity;
+import com.mall.order.service.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.mall.order.entity.OrderEntity;
-import com.mall.order.service.OrderService;
-import com.mall.common.utils.PageUtils;
-import com.mall.common.utils.R;
 
 
 
