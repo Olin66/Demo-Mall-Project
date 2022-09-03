@@ -7,12 +7,14 @@ import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
+import java.util.UUID;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -30,7 +32,8 @@ class MallOrderApplicationTests {
         entity.setId(1L);
         entity.setName("awd");
         entity.setCreateTime(new Date());
-        rabbitTemplate.convertAndSend("java-exchange", "hello.java", entity);
+        rabbitTemplate.convertAndSend("java-exchange", "hello.java", entity,
+                new CorrelationData(UUID.randomUUID().toString()));
     }
 
     @Test
