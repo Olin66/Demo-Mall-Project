@@ -2,6 +2,7 @@ package com.mall.cart.controller;
 
 import com.mall.cart.service.CartService;
 import com.mall.cart.vo.CartItemVo;
+import com.mall.cart.vo.CartVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +19,9 @@ public class CartController {
     CartService cartService;
 
     @GetMapping("/cart.html")
-    public String cartListPage() {
+    public String cartListPage(Model model) throws ExecutionException, InterruptedException {
+        CartVo cart = cartService.getCart();
+        model.addAttribute("cart", cart);
         return "cartList";
     }
 

@@ -6,6 +6,7 @@ import com.mall.cart.feign.ProductFeignService;
 import com.mall.cart.interceptor.CartInterceptor;
 import com.mall.cart.service.CartService;
 import com.mall.cart.vo.CartItemVo;
+import com.mall.cart.vo.CartVo;
 import com.mall.cart.vo.SkuInfoVo;
 import com.mall.common.constant.CartConstant;
 import com.mall.common.to.UserInfoTo;
@@ -38,7 +39,7 @@ public class CartServiceImpl implements CartService {
         CartItemVo vo;
         BoundHashOperations<String, Object, Object> operations = getCartOps();
         String result = (String) operations.get(skuId.toString());
-        if (StringUtils.isEmpty(result)){
+        if (StringUtils.isEmpty(result)) {
             vo = new CartItemVo();
             CompletableFuture<Void> skuInfo = CompletableFuture.runAsync(() -> {
                 R r = productFeignService.info(skuId);
@@ -73,6 +74,32 @@ public class CartServiceImpl implements CartService {
         return JSONObject.parseObject(o, CartItemVo.class);
     }
 
+    @Override
+    public CartVo getCart() throws ExecutionException, InterruptedException {
+        CartVo cart = new CartVo();
+        UserInfoTo user = CartInterceptor.threadLocal.get();
+        if (user.getUserId() != null) {
+            List<CartItemVo> notLoginCartItems = getCartItems(CartConstant.CART_PREFIX + user.getUserKey());
+            if (notLoginCartItems != null && !notLoginCartItems.isEmpty()) {
+                for (CartItemVo vo : notLoginCartItems) {
+                    addToCart(vo.getSkuId(), vo.getCount());
+                }
+                clearCart(CartConstant.CART_PREFIX + user.getUserKey());
+            }
+            List<CartItemVo> loginCartItems = getCartItems(CartConstant.CART_PREFIX + user.getUserId());
+            cart.setItems(loginCartItems);
+        } else {
+            List<CartItemVo> cartItems = getCartItems(CartConstant.CART_PREFIX + user.getUserKey());
+            cart.setItems(cartItems);
+        }
+        return cart;
+    }
+
+    @Override
+    public void clearCart(String cartKey) {
+        redisTemplate.delete(cartKey);
+    }
+
     private BoundHashOperations<String, Object, Object> getCartOps() {
         UserInfoTo user = CartInterceptor.threadLocal.get();
         String cartKey;
@@ -83,4 +110,16 @@ public class CartServiceImpl implements CartService {
         }
         return redisTemplate.boundHashOps(cartKey);
     }
+
+    private List<CartItemVo> getCartItems(String cartKey) {
+        BoundHashOperations<String, Object, Object> operations = redisTemplate.boundHashOps(cartKey);
+        List<Object> values = operations.values();
+        if (values != null && !values.isEmpty()) {
+            return values.stream().map(obj -> {
+                String str = (String) obj;
+                return JSONObject.parseObject(str, CartItemVo.class);
+            }).toList();
+        } else return null;
+    }
+
 }
