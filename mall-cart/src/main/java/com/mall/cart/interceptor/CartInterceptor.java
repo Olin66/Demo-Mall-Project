@@ -21,25 +21,25 @@ public class CartInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        UserInfoTo user = new UserInfoTo();
         HttpSession session = request.getSession();
         MemberRespVo attribute = (MemberRespVo) session.getAttribute(AuthConstant.LOGIN_USER);
-        if (attribute != null){
+        UserInfoTo user = new UserInfoTo();
+        if (attribute != null) {
             user.setUserId(attribute.getId());
         }
         Cookie[] cookies = request.getCookies();
-        if (cookies != null){
-            for (Cookie cookie: cookies){
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
                 String name = cookie.getName();
-                if (name.equals(CartConstant.TEMP_USER_COOKIE_NAME)){
-                    user.setUserKey(name);
+                if (name.equals(CartConstant.TEMP_USER_COOKIE_NAME)) {
+                    user.setUserKey(cookie.getValue());
+                    user.setTempUser(true);
                 }
             }
         }
-        if (StringUtils.isEmpty(user.getUserKey())){
+        if (StringUtils.isEmpty(user.getUserKey())) {
             String uuid = UUID.randomUUID().toString();
             user.setUserKey(uuid);
-            user.setTempUser(true);
         }
         threadLocal.set(user);
         return true;
@@ -53,5 +53,6 @@ public class CartInterceptor implements HandlerInterceptor {
         cookie.setDomain("olinmall.com");
         cookie.setMaxAge(CartConstant.TEMP_USER_COOKIE_TIMEOUT);
         response.addCookie(cookie);
+        user.setTempUser(true);
     }
 }

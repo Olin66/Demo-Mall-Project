@@ -71,6 +71,7 @@ public class CartServiceImpl implements CartService {
     public CartItemVo getCartItem(Long skuId) {
         BoundHashOperations<String, Object, Object> operations = getCartOps();
         String o = (String) operations.get(skuId.toString());
+        CartItemVo vo = JSONObject.parseObject(o, CartItemVo.class);
         return JSONObject.parseObject(o, CartItemVo.class);
     }
 
@@ -127,7 +128,7 @@ public class CartServiceImpl implements CartService {
     private BoundHashOperations<String, Object, Object> getCartOps() {
         UserInfoTo user = CartInterceptor.threadLocal.get();
         String cartKey;
-        if (user.getUserKey() != null) {
+        if (user.getUserId() != null) {
             cartKey = CartConstant.CART_PREFIX + user.getUserId();
         } else {
             cartKey = CartConstant.CART_PREFIX + user.getUserKey();
