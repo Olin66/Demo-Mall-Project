@@ -21,6 +21,7 @@ import com.mall.order.service.OrderService;
 import com.mall.order.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -106,7 +107,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Override
     public OrderSubmitRespVo submitOrder(OrderSubmitVo vo) {
-        return null;
+        OrderSubmitRespVo resp = new OrderSubmitRespVo();
+        MemberRespVo memberRespVo = LoginUserInterceptor.loginUser.get();
+        String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+        String formToken = vo.getOrderToken();
+        Long result = redisTemplate.execute(new DefaultRedisScript<>(script, Long.class),
+                List.of(OrderConstant.USER_ORDER_TOKEN_PREFIX + memberRespVo.getId()),
+                formToken);
+        if (result == null || result == 0L){
+            return resp;
+        } else {
+            return resp;
+        }
     }
 
 }
