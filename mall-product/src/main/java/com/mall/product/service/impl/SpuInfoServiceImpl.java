@@ -1,7 +1,7 @@
 package com.mall.product.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -198,16 +198,13 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         Map<Long, Boolean> map = null;
         try {
             R r = wareFeignService.getSkusHasStock(skuIdList);
-            List<SkuHasStockTo> data = (List<SkuHasStockTo>) r.get("data");
-            map = data.stream().collect(Collectors.toMap(o -> {
-                String s = JSON.toJSONString(o);
-                SkuHasStockTo to = JSONObject.parseObject(s, SkuHasStockTo.class);
-                return to.getSkuId();
-            }, o -> {
-                String s = JSON.toJSONString(o);
-                SkuHasStockTo to = JSONObject.parseObject(s, SkuHasStockTo.class);
-                return to.getHasStock();
-            }));
+            String json = JSON.toJSONString(r.get("data"));
+            JSONArray array = JSONArray.parseArray(json);
+            List<SkuHasStockTo> data = array.toJavaList(SkuHasStockTo.class);
+            if (data != null) {
+                map = data.stream()
+                        .collect(Collectors.toMap(SkuHasStockTo::getSkuId, SkuHasStockTo::getHasStock));
+            }
         } catch (Exception e) {
             log.error("库存服务查询异常！原因：", e);
         }
