@@ -2,11 +2,14 @@ package com.mall.order.web;
 
 import com.mall.order.service.OrderService;
 import com.mall.order.vo.OrderConfirmVo;
+import com.mall.order.vo.OrderSubmitRespVo;
+import com.mall.order.vo.OrderSubmitVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.concurrent.ExecutionException;
 
@@ -26,5 +29,15 @@ public class WebController {
         OrderConfirmVo vo = orderService.confirmOrder();
         model.addAttribute("orderConfirmData", vo);
         return "confirm";
+    }
+
+    @PostMapping("/submitOrder")
+    public String submitOrder(OrderSubmitVo vo) {
+        OrderSubmitRespVo resp = orderService.submitOrder(vo);
+        if (resp.getCode() == 0){
+            return "pay";
+        } else {
+            return "redirect:http://order.olinmall.com/toTrade";
+        }
     }
 }

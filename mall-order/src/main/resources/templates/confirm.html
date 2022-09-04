@@ -493,8 +493,12 @@
         </p>
         <p class="yfze_b">寄送至： <span id="receiveAddress"></span> 收货人：<span id="receiveId"></span></p>
     </div>
-    <input type="hidden" name="orderToken" th:value="${orderConfirmData.orderToken}"/>
-    <button class="tijiao">提交订单</button>
+    <form action="http://order.olinmall.com/submitOrder" method="post">
+        <input id="addrIdInput" type="hidden" name="addrId"/>
+        <input id="payPriceInput" type="hidden" name="payPrice"/>
+        <input type="hidden" name="orderToken" th:value="${orderConfirmData.orderToken}"/>
+        <button class="tijiao" type="submit">提交订单</button>
+    </form>
 </div>
 </div>
 
@@ -735,6 +739,7 @@
         let ele = $(".addr-item p[def='1']");
         ele.css({"border": "2px solid red"});
         let addrId = ele.attr("addrId");
+        $("#addrIdInput").val(addrId);
         $.get("http://olinmall.com/api/ware/wareinfo/fare?addrId=" + addrId, function (data) {
             $("#fare").text(data.fare);
             let ori = [[${orderConfirmData.getTotal()}]];
@@ -742,6 +747,7 @@
             $("#payPrice").text(pay.toString());
             $("#receiveAddress").text(data.address.province + " " + data.address.city + " " + data.address.detailAddress);
             $("#receiveId").text(data.address.name);
+            $("#payPriceInput").val(pay)
         })
     }
 

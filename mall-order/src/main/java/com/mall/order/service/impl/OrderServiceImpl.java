@@ -18,9 +18,7 @@ import com.mall.order.feign.MemberFeignService;
 import com.mall.order.feign.WareFeignService;
 import com.mall.order.interceptor.LoginUserInterceptor;
 import com.mall.order.service.OrderService;
-import com.mall.order.vo.OrderAddressVo;
-import com.mall.order.vo.OrderConfirmVo;
-import com.mall.order.vo.OrderItemVo;
+import com.mall.order.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -104,6 +102,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 token, 30, TimeUnit.MINUTES);
         CompletableFuture.allOf(addressTask, itemTask, integrationTask).get();
         return vo;
+    }
+
+    @Override
+    public OrderSubmitRespVo submitOrder(OrderSubmitVo vo) {
+        return null;
     }
 
 }
