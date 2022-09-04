@@ -14,9 +14,9 @@ public class FeignConfig {
     @Bean
     public RequestInterceptor requestInterceptor() {
         return template -> {
-                ServletRequestAttributes requestAttributes
-                        = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            assert requestAttributes != null;
+            ServletRequestAttributes requestAttributes
+                    = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (requestAttributes == null) return;
             HttpServletRequest request = requestAttributes.getRequest();
             String cookie = request.getHeader("Cookie");
             template.header("Cookie", cookie);

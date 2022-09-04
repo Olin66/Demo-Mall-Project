@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class OrderConfirmVo {
@@ -11,6 +12,7 @@ public class OrderConfirmVo {
     List<OrderItemVo> items;
     Integer integration;
     String orderToken;
+    Map<Long, Boolean> stocks;
 
     public Integer getCount() {
         Integer count = 0;

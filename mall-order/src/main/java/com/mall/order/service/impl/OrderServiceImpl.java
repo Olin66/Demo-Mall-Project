@@ -1,15 +1,20 @@
 package com.mall.order.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mall.common.to.SkuHasStockTo;
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.Query;
+import com.mall.common.utils.R;
 import com.mall.common.vo.MemberRespVo;
 import com.mall.order.dao.OrderDao;
 import com.mall.order.entity.OrderEntity;
 import com.mall.order.feign.CartFeignService;
 import com.mall.order.feign.MemberFeignService;
+import com.mall.order.feign.WareFeignService;
 import com.mall.order.interceptor.LoginUserInterceptor;
 import com.mall.order.service.OrderService;
 import com.mall.order.vo.OrderAddressVo;
@@ -25,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 
 @Service("orderService")
@@ -38,6 +44,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     CartFeignService cartFeignService;
+
+    @Autowired
+    WareFeignService wareFeignService;
 
 
     @Override
@@ -64,6 +73,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             RequestContextHolder.setRequestAttributes(attributes);
             List<OrderItemVo> items = cartFeignService.getCurrentUserCartItems();
             vo.setItems(items);
+        }, executor).thenRunAsync(() -> {
+            List<OrderItemVo> items = vo.getItems();
+            List<Long> list = items.stream().map(OrderItemVo::getSkuId).toList();
+            R r = wareFeignService.getSkusHasStock(list);
+            String json = JSON.toJSONString(r.get("data"));
+            JSONArray array = JSONArray.parseArray(json);
+            List<SkuHasStockTo> data = array.toJavaList(SkuHasStockTo.class);
+            if (data != null) {
+                Map<Long, Boolean> map = data.stream()
+                        .collect(Collectors.toMap(SkuHasStockTo::getSkuId, SkuHasStockTo::getHasStock));
+                vo.setStocks(map);
+            }
         }, executor);
         CompletableFuture<Void> integrationTask = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(attributes);
