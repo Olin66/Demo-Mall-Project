@@ -15,6 +15,7 @@ public class LoginUserInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        if (loginUser.get() != null) return true;
         MemberRespVo attribute = (MemberRespVo) request.getSession().getAttribute(AuthConstant.LOGIN_USER);
         if (attribute != null) {
             loginUser.set(attribute);

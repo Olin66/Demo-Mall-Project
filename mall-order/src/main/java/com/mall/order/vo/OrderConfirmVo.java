@@ -12,6 +12,16 @@ public class OrderConfirmVo {
     Integer integration;
     String orderToken;
 
+    public Integer getCount() {
+        Integer count = 0;
+        if (items != null) {
+            for (OrderItemVo item : items) {
+                count += item.getCount();
+            }
+        }
+        return count;
+    }
+
     public BigDecimal getTotal() {
         BigDecimal total = new BigDecimal(0);
         if (items != null) {
