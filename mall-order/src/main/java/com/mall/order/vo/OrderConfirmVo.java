@@ -7,9 +7,23 @@ import java.util.List;
 
 @Data
 public class OrderConfirmVo {
-    List<AddressVo> addresses;
+    List<OrderAddressVo> addresses;
     List<OrderItemVo> items;
     Integer integration;
-    BigDecimal total;
-    BigDecimal payPrice;
+    String orderToken;
+
+    public BigDecimal getTotal() {
+        BigDecimal total = new BigDecimal(0);
+        if (items != null) {
+            for (OrderItemVo item : items) {
+                BigDecimal multiply = item.getPrice().multiply(new BigDecimal(item.getCount()));
+                total = total.add(multiply);
+            }
+        }
+        return total;
+    }
+
+    public BigDecimal getPayPrice() {
+        return getTotal();
+    }
 }

@@ -3,7 +3,7 @@ package com.mall.order.vo;
 import lombok.Data;
 
 @Data
-public class AddressVo {
+public class OrderAddressVo {
     private Long id;
     private Long memberId;
     private String name;
