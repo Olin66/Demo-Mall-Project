@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mall.common.constant.OrderConstant;
 import com.mall.common.to.SkuHasStockTo;
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.Query;
@@ -21,20 +22,26 @@ import com.mall.order.vo.OrderAddressVo;
 import com.mall.order.vo.OrderConfirmVo;
 import com.mall.order.vo.OrderItemVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
 @Service("orderService")
 public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> implements OrderService {
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
 
     @Autowired
     ThreadPoolExecutor executor;
@@ -91,6 +98,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             Integer integration = memberRespVo.getIntegration();
             vo.setIntegration(integration);
         }, executor);
+        String token = UUID.randomUUID().toString().replace("-", "");
+        vo.setOrderToken(token);
+        redisTemplate.opsForValue().set(OrderConstant.USER_ORDER_TOKEN_PREFIX + memberRespVo.getId(),
+                token, 30, TimeUnit.MINUTES);
         CompletableFuture.allOf(addressTask, itemTask, integrationTask).get();
         return vo;
     }
