@@ -7,7 +7,8 @@ public enum ExceptionCodeEnum {
     PRODUCT_UP_EXCEPTION(11000, "商品上架异常"),
     USERNAME_EXISTED_EXCEPTION(15001, "用户名已经存在"),
     PHONE_EXISTED_EXCEPTION(15002, "手机号已经存在"),
-    LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION(15003, "登陆账号或密码错误");
+    LOGIN_ACCOUNT_PASSWORD_INVALID_EXCEPTION(15003, "登陆账号或密码错误"),
+    NO_STOCK_EXCEPTION(21000, "商品库存不足");
 
 
     private final int code;

@@ -4,17 +4,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.mall.common.to.SkuHasStockTo;
 import com.mall.common.utils.PageUtils;
 import com.mall.ware.entity.WareSkuEntity;
+import com.mall.ware.vo.WareSkuLockVo;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * 商品库存
- *
- * @author SnowCharm
- * @email 619022098@qq.com
- * @date 2022-07-10 19:48:36
- */
 public interface WareSkuService extends IService<WareSkuEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
@@ -22,5 +16,7 @@ public interface WareSkuService extends IService<WareSkuEntity> {
     void addStack(Long skuId, Long wareId, Integer skuNum);
 
     List<SkuHasStockTo> getSkuHasStock(List<Long> skuIds);
+
+    void orderLockStock(WareSkuLockVo vo);
 }
 
