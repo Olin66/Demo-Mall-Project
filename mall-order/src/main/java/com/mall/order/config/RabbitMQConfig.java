@@ -1,24 +1,17 @@
 package com.mall.order.config;
 
-import com.mall.order.entity.OrderEntity;
-import com.rabbitmq.client.Channel;
-import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
 public class RabbitMQConfig {
-
-    @RabbitListener(queues = "order.release.order.queue")
-    public void listen(OrderEntity entity, Channel channel, Message message) throws IOException {
-        System.out.println(entity);
-        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-    }
 
     @Bean
     public Queue orderDelayQueue() {
