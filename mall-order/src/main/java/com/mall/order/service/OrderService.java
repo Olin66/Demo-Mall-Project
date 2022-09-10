@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.mall.common.utils.PageUtils;
 import com.mall.order.entity.OrderEntity;
 import com.mall.order.vo.OrderConfirmVo;
+import com.mall.order.vo.OrderCreateVo;
 import com.mall.order.vo.OrderSubmitRespVo;
 import com.mall.order.vo.OrderSubmitVo;
 
@@ -19,5 +20,7 @@ public interface OrderService extends IService<OrderEntity> {
     OrderSubmitRespVo submitOrder(OrderSubmitVo vo);
 
     OrderEntity getOrderByOrderSn(String orderSn);
+
+    void closeOrder(OrderCreateVo entity);
 }
 

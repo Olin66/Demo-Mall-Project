@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.common.exception.NoStockException;
 import com.mall.common.to.SkuHasStockTo;
+import com.mall.common.to.mq.OrderTo;
 import com.mall.common.to.mq.StockDetailTo;
 import com.mall.common.to.mq.StockLockedTo;
 import com.mall.common.utils.PageUtils;
@@ -167,11 +168,27 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             WareOrderTaskEntity task = wareOrderTaskService.getById(id);
             String orderSn = task.getOrderSn();
             Integer status = orderFeignService.getOrderStatus(orderSn);
-            if ((status == null || status == 4) && byId.getLockStatus() == 1) {
-                unlockStock(detail.getSkuId(), detail.getWareId(), detail.getSkuNum(), detailId);
+            if (status == null || status == 4) {
+                if (byId.getLockStatus() == 1) {
+                    unlockStock(detail.getSkuId(), detail.getWareId(), detail.getSkuNum(), detailId);
+                }
             } else {
                 throw new RuntimeException();
             }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void unlockStock(OrderTo to) {
+        String orderSn = to.getOrderSn();
+        WareOrderTaskEntity task = wareOrderTaskService.getOrderTaskBySn(orderSn);
+        Long id = task.getId();
+        List<WareOrderTaskDetailEntity> list = wareOrderTaskDetailService.list(new QueryWrapper<WareOrderTaskDetailEntity>()
+                .eq("task_id", id)
+                .eq("lock_status", 1));
+        for (WareOrderTaskDetailEntity entity : list) {
+            unlockStock(entity.getSkuId(), entity.getWareId(), entity.getSkuNum(), entity.getId());
         }
     }
 

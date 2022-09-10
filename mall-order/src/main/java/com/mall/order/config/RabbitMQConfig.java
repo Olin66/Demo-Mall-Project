@@ -43,4 +43,10 @@ public class RabbitMQConfig {
         return new Binding("order.release.order.queue", Binding.DestinationType.QUEUE,
                 "order-event-exchange", "order.release.order", null);
     }
+
+    @Bean
+    public Binding releaseOtherBinding(){
+        return new Binding("stock.release.stock.queue", Binding.DestinationType.QUEUE,
+                "order-event-exchange", "order.release.other.#", null);
+    }
 }

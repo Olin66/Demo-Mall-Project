@@ -7,8 +7,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.common.constant.OrderConstant;
-import com.mall.common.exception.NoStockException;
 import com.mall.common.to.SkuHasStockTo;
+import com.mall.common.to.mq.OrderTo;
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.Query;
 import com.mall.common.utils.R;
@@ -25,6 +25,8 @@ import com.mall.order.interceptor.LoginUserInterceptor;
 import com.mall.order.service.OrderItemService;
 import com.mall.order.service.OrderService;
 import com.mall.order.vo.*;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -37,6 +39,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -52,6 +55,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     StringRedisTemplate redisTemplate;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     @Autowired
     ThreadPoolExecutor executor;
@@ -156,9 +162,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 R r = wareFeignService.orderLockStock(lockVo);
                 if (r.getCode() != 0) {
                     resp.setCode(3);
-                    throw new NoStockException();
                 } else {
                     resp.setOrder(order.getOrder());
+                    rabbitTemplate.convertAndSend("order-event-exchange", "order.create.order", order);
                 }
             } else {
                 resp.setCode(2);
@@ -170,6 +176,21 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Override
     public OrderEntity getOrderByOrderSn(String orderSn) {
         return this.getOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));
+    }
+
+    @Override
+    public void closeOrder(OrderCreateVo vo) {
+        OrderEntity order = vo.getOrder();
+        if (order != null && Objects.equals(order.getStatus(), OrderStatusEnum.CREATE_NEW.getCode())) {
+            OrderEntity temp = new OrderEntity();
+            temp.setId(order.getId());
+            temp.setStatus(OrderStatusEnum.CANCELED.getCode());
+            this.updateById(temp);
+            OrderTo to = new OrderTo();
+            BeanUtils.copyProperties(order, to);
+            to.setStatus(OrderStatusEnum.CANCELED.getCode());
+            rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", to);
+        }
     }
 
     private void saveOrder(OrderCreateVo order) {
