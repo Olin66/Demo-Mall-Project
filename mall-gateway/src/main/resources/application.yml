@@ -54,6 +54,10 @@ spring:
           uri: lb://mall-order
           predicates:
             - Host=order.olinmall.com
+        - id: mall_member_host
+          uri: lb://mall-member
+          predicates:
+            - Host=member.olinmall.com
         - id: mall_host
           uri: lb://mall-product
           predicates:

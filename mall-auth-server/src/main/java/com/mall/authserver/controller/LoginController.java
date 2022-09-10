@@ -60,7 +60,7 @@ public class LoginController {
     }
 
     @GetMapping("/login.html")
-    public String loginPage(HttpSession session){
+    public String loginPage(HttpSession session) {
         if (session.getAttribute(AuthConstant.LOGIN_USER) == null) {
             return "login";
         } else {
@@ -106,12 +106,12 @@ public class LoginController {
     @PostMapping("/login")
     public String login(UserLoginVo vo, RedirectAttributes redirectAttributes, HttpSession session) {
         R r = memberFeignService.login(vo);
-        if (r.getCode() == 0){
+        if (r.getCode() == 0) {
             String s = JSON.toJSONString(r.get("data"));
             MemberRespVo data = JSON.parseObject(s, MemberRespVo.class);
             session.setAttribute(AuthConstant.LOGIN_USER, data);
             return "redirect:http://olinmall.com";
-        }else {
+        } else {
             Map<String, String> errors = new HashMap<>();
             errors.put("msg", r.get("msg").toString());
             redirectAttributes.addFlashAttribute("errors", errors);
