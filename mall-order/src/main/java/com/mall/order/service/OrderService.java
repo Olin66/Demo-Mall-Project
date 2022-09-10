@@ -21,5 +21,7 @@ public interface OrderService extends IService<OrderEntity> {
     void closeOrder(OrderCreateVo entity);
 
     PayVo getOrderPayVo(String orderSn);
+
+    PageUtils queryPageWithItem(Map<String, Object> params);
 }
 
