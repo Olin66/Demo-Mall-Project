@@ -2,10 +2,12 @@ package com.mall.ware.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-
-import java.io.Serializable;
-import java.util.Date;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 库存工作单
@@ -16,7 +18,10 @@ import lombok.Data;
  */
 @Data
 @TableName("wms_ware_order_task_detail")
+@NoArgsConstructor
+@AllArgsConstructor
 public class WareOrderTaskDetailEntity implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**

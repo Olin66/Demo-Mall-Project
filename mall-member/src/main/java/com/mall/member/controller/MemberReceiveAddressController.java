@@ -18,6 +18,7 @@ public class MemberReceiveAddressController {
     @Autowired
     private MemberReceiveAddressService memberReceiveAddressService;
 
+    @ResponseBody
     @GetMapping("/{memberId}/addresses")
     public List<MemberReceiveAddressEntity> getAddresses(@PathVariable("memberId") Long memberId) {
         return memberReceiveAddressService.getAddresses(memberId);

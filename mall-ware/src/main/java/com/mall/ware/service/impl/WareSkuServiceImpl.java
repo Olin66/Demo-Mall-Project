@@ -7,17 +7,26 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.common.exception.NoStockException;
 import com.mall.common.to.SkuHasStockTo;
+import com.mall.common.to.mq.StockDetailTo;
+import com.mall.common.to.mq.StockLockedTo;
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.Query;
 import com.mall.common.utils.R;
 import com.mall.ware.dao.WareSkuDao;
+import com.mall.ware.entity.WareOrderTaskDetailEntity;
+import com.mall.ware.entity.WareOrderTaskEntity;
 import com.mall.ware.entity.WareSkuEntity;
+import com.mall.ware.feign.OrderFeignService;
 import com.mall.ware.feign.ProductFeignService;
+import com.mall.ware.service.WareOrderTaskDetailService;
+import com.mall.ware.service.WareOrderTaskService;
 import com.mall.ware.service.WareSkuService;
 import com.mall.ware.vo.SkuWareHasStockVo;
 import com.mall.ware.vo.WareItemVo;
 import com.mall.ware.vo.WareSkuLockVo;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +40,19 @@ import java.util.Map;
 public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> implements WareSkuService {
 
     @Autowired
+    WareOrderTaskService wareOrderTaskService;
+
+    @Autowired
+    WareOrderTaskDetailService wareOrderTaskDetailService;
+
+    @Autowired
     ProductFeignService productFeignService;
+
+    @Autowired
+    OrderFeignService orderFeignService;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -91,8 +112,11 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
     }
 
     @Override
-    @Transactional(rollbackFor = NoStockException.class)
+    @Transactional
     public void orderLockStock(WareSkuLockVo vo) {
+        WareOrderTaskEntity wareOrderTaskEntity = new WareOrderTaskEntity();
+        wareOrderTaskEntity.setOrderSn(vo.getOrderSn());
+        wareOrderTaskService.save(wareOrderTaskEntity);
         List<WareItemVo> locks = vo.getLocks();
         List<SkuWareHasStockVo> hasStocks = locks.stream().map(item -> {
             SkuWareHasStockVo stock = new SkuWareHasStockVo();
@@ -114,6 +138,16 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                 Long count = this.baseMapper.lockSkuStock(skuId, wareId, hasStock.getNum());
                 if (count == 1) {
                     lock = true;
+                    WareOrderTaskDetailEntity wareOrderTaskDetailEntity
+                            = new WareOrderTaskDetailEntity(null, skuId, "", hasStock.getNum(),
+                            wareOrderTaskEntity.getId(), wareId, 1);
+                    wareOrderTaskDetailService.save(wareOrderTaskDetailEntity);
+                    StockLockedTo stockLockedTo = new StockLockedTo();
+                    StockDetailTo stockDetailTo = new StockDetailTo();
+                    BeanUtils.copyProperties(wareOrderTaskDetailEntity, stockDetailTo);
+                    stockLockedTo.setId(wareOrderTaskEntity.getId());
+                    stockLockedTo.setDetail(stockDetailTo);
+                    rabbitTemplate.convertAndSend("stock-event-exchange", "stock.locked", stockLockedTo);
                     break;
                 }
             }
@@ -123,4 +157,30 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         }
     }
 
+    @Override
+    public void unlockStock(StockLockedTo to) {
+        StockDetailTo detail = to.getDetail();
+        Long detailId = detail.getId();
+        WareOrderTaskDetailEntity byId = wareOrderTaskDetailService.getById(detailId);
+        if (byId != null) {
+            Long id = to.getId();
+            WareOrderTaskEntity task = wareOrderTaskService.getById(id);
+            String orderSn = task.getOrderSn();
+            Integer status = orderFeignService.getOrderStatus(orderSn);
+            if ((status == null || status == 4) && byId.getLockStatus() == 1) {
+                unlockStock(detail.getSkuId(), detail.getWareId(), detail.getSkuNum(), detailId);
+            } else {
+                throw new RuntimeException();
+            }
+        }
+    }
+
+
+    private void unlockStock(Long skuId, Long wareId, Integer num, Long detailId) {
+        this.baseMapper.unlockStock(skuId, wareId, num);
+        WareOrderTaskDetailEntity entity = new WareOrderTaskDetailEntity();
+        entity.setId(detailId);
+        entity.setLockStatus(2);
+        wareOrderTaskDetailService.updateById(entity);
+    }
 }
