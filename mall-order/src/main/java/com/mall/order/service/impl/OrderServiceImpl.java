@@ -37,6 +37,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -191,6 +192,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             to.setStatus(OrderStatusEnum.CANCELED.getCode());
             rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", to);
         }
+    }
+
+    @Override
+    public PayVo getOrderPayVo(String orderSn) {
+        PayVo payVo = new PayVo();
+        OrderEntity entity = this.getOrderByOrderSn(orderSn);
+        payVo.setOut_trade_no(orderSn);
+        payVo.setTotal_amount(entity.getPayAmount().setScale(2, RoundingMode.UP).toString());
+        payVo.setSubject("下单商品");
+        payVo.setBody("商品信息");
+        return payVo;
     }
 
     private void saveOrder(OrderCreateVo order) {

@@ -42,6 +42,11 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.33.39.ALL</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
