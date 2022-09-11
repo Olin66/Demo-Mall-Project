@@ -16,6 +16,7 @@ import com.mall.common.vo.MemberRespVo;
 import com.mall.order.dao.OrderDao;
 import com.mall.order.entity.OrderEntity;
 import com.mall.order.entity.OrderItemEntity;
+import com.mall.order.entity.PaymentInfoEntity;
 import com.mall.order.enume.OrderStatusEnum;
 import com.mall.order.feign.CartFeignService;
 import com.mall.order.feign.MemberFeignService;
@@ -24,6 +25,7 @@ import com.mall.order.feign.WareFeignService;
 import com.mall.order.interceptor.LoginUserInterceptor;
 import com.mall.order.service.OrderItemService;
 import com.mall.order.service.OrderService;
+import com.mall.order.service.PaymentInfoService;
 import com.mall.order.vo.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
@@ -77,6 +79,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     OrderItemService orderItemService;
+
+    @Autowired
+    PaymentInfoService paymentInfoService;
 
 
     @Override
@@ -220,6 +225,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         }).toList();
         page.setRecords(entities);
         return new PageUtils(page);
+    }
+
+    @Override
+    public String handlePayResult(PayAsyncVo vo) {
+        PaymentInfoEntity entity = new PaymentInfoEntity();
+        entity.setAlipayTradeNo(vo.getTrade_no());
+        entity.setOrderSn(vo.getOut_trade_no());
+        entity.setPaymentStatus(vo.getTrade_status());
+        paymentInfoService.save(entity);
+        if(vo.getTrade_status().equals("TRADE_SUCCESS") || vo.getTrade_status().equals("TRADE_FINISHED")) {
+            String orderSn = vo.getOut_trade_no();
+            this.baseMapper.updateOrderStatus(orderSn, OrderStatusEnum.PAYED.getCode());
+        }
+        return "success";
     }
 
     private void saveOrder(OrderCreateVo order) {

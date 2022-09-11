@@ -230,13 +230,13 @@
                     </td>
                     <td th:if="${itemStatus.index==0}" th:rowspan="${itemStatus.size}">
                         <ul>
-                            <li style="color:#71B247;" th:if="order.status==0">待付款</li>
-                            <li style="color:#71B247;" th:if="order.status==1">已付款</li>
-                            <li style="color:#71B247;" th:if="order.status==2">已发货</li>
-                            <li style="color:#71B247;" th:if="order.status==3">已完成</li>
-                            <li style="color:#71B247;" th:if="order.status==4">已取消</li>
-                            <li style="color:#71B247;" th:if="order.status==5">售后中</li>
-                            <li style="color:#71B247;" th:if="order.status==6">售后完成</li>
+                            <li style="color:#71B247;" th:if="${order.status==0}">待付款</li>
+                            <li style="color:#71B247;" th:if="${order.status==1}">已付款</li>
+                            <li style="color:#71B247;" th:if="${order.status==2}">已发货</li>
+                            <li style="color:#71B247;" th:if="${order.status==3}">已完成</li>
+                            <li style="color:#71B247;" th:if="${order.status==4}">已取消</li>
+                            <li style="color:#71B247;" th:if="${order.status==5}">售后中</li>
+                            <li style="color:#71B247;" th:if="${order.status==6}">售后完成</li>
                             <li style="margin:4px 0;" class="hide"><i class="table_i2"></i>跟踪<i class="table_i3"></i>
                                 <div class="hi">
                                     <div class="p-tit">
