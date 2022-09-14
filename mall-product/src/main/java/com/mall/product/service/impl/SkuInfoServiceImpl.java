@@ -1,15 +1,20 @@
 package com.mall.product.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.Query;
+import com.mall.common.utils.R;
 import com.mall.product.dao.SkuInfoDao;
 import com.mall.product.entity.SkuImagesEntity;
 import com.mall.product.entity.SkuInfoEntity;
 import com.mall.product.entity.SpuInfoDescEntity;
+import com.mall.product.feign.SeckillFeignService;
 import com.mall.product.service.*;
+import com.mall.product.vo.SeckillInfoVo;
 import com.mall.product.vo.SkuItemVo;
 import com.mall.product.vo.pojo.SkuSaleAttr;
 import com.mall.product.vo.pojo.SpuAttrGroup;
@@ -23,7 +28,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
-
 
 @Service("skuInfoService")
 public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> implements SkuInfoService {
@@ -39,6 +43,9 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
 
     @Autowired
     SkuSaleAttrValueService skuSaleAttrValueService;
+
+    @Autowired
+    SeckillFeignService seckillFeignService;
 
     @Autowired
     ThreadPoolExecutor executor;
@@ -126,7 +133,15 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
             List<SkuImagesEntity> images = skuImagesService.getImagesBySkuId(skuId);
             vo.setImages(images);
         }, executor);
-        CompletableFuture.allOf(saleAttrFuture, descFuture, baseAttrFuture, imageFuture).get();
+        CompletableFuture<Void> seckillFuture = CompletableFuture.runAsync(() -> {
+            R r = seckillFeignService.getSkuSeckillInfo(skuId);
+            if (r.getCode() == 0) {
+                String json = JSON.toJSONString(r.get("data"));
+                SeckillInfoVo seckillInfoVo = JSONObject.parseObject(json, SeckillInfoVo.class);
+                vo.setSeckillInfo(seckillInfoVo);
+            }
+        }, executor);
+        CompletableFuture.allOf(saleAttrFuture, descFuture, baseAttrFuture, imageFuture, seckillFuture).get();
         return vo;
     }
 

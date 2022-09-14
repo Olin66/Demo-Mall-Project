@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Service
 public class SeckillServiceImpl implements SeckillService {
@@ -56,7 +57,7 @@ public class SeckillServiceImpl implements SeckillService {
     public List<SeckillSkuRedisVo> getCurrentSeckillSkus() {
         long time = new Date().getTime();
         Set<String> keys = stringRedisTemplate.keys(SeckillConstant.SESSIONS_CACHE_PREFIX + "*");
-        if (keys != null){
+        if (keys != null) {
             for (String key : keys) {
                 String replace = key.replace(SeckillConstant.SESSIONS_CACHE_PREFIX, "");
                 String[] strings = replace.split("_");
@@ -70,6 +71,30 @@ public class SeckillServiceImpl implements SeckillService {
                         List<Object> objects = ops.multiGet(list);
                         if (objects != null) {
                             return objects.stream().map(o -> JSON.parseObject((String) o, SeckillSkuRedisVo.class)).toList();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public SeckillSkuRedisVo getSkuSeckillInfo(Long skuId) {
+        BoundHashOperations<String, String, String> ops = stringRedisTemplate.boundHashOps(SeckillConstant.SECKILL_SKU_CACHE);
+        Set<String> keys = ops.keys();
+        if (keys != null && !keys.isEmpty()) {
+            String reg = "\\d_" + skuId;
+            for (String key : keys) {
+                if (Pattern.matches(reg, key)) {
+                    String json = ops.get(key);
+                    SeckillSkuRedisVo vo = JSON.parseObject(json, SeckillSkuRedisVo.class);
+                    if (vo != null) {
+                        long now = new Date().getTime();
+                        long start = vo.getStartTime();
+                        long end = vo.getEndTime();
+                        if (!(now >= start && now <= end)) {
+                            vo.setRandomCode(null);
                         }
                     }
                 }
