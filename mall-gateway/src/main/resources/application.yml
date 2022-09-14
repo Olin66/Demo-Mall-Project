@@ -51,7 +51,7 @@ spring:
           predicates:
             - Host=cart.olinmall.com
         - id: mall_seckill_host
-          uri: lb://seckill-cart
+          uri: lb://mall-seckill
           predicates:
             - Host=seckill.olinmall.com
         - id: mall_order_host

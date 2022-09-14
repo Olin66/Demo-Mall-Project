@@ -18,7 +18,9 @@ import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -43,10 +45,37 @@ public class SeckillServiceImpl implements SeckillService {
         if (r.getCode() == 0) {
             String json = JSON.toJSONString(r.get("data"));
             JSONArray array = JSON.parseArray(json);
+            if (array == null) return;
             List<SeckillSessionsWithSkusVo> list = array.toJavaList(SeckillSessionsWithSkusVo.class);
             saveSessionInfo(list);
             saveSessionSkuInfo(list);
         }
+    }
+
+    @Override
+    public List<SeckillSkuRedisVo> getCurrentSeckillSkus() {
+        long time = new Date().getTime();
+        Set<String> keys = stringRedisTemplate.keys(SeckillConstant.SESSIONS_CACHE_PREFIX + "*");
+        if (keys != null){
+            for (String key : keys) {
+                String replace = key.replace(SeckillConstant.SESSIONS_CACHE_PREFIX, "");
+                String[] strings = replace.split("_");
+                long start = Long.parseLong(strings[0]);
+                long end = Long.parseLong(strings[1]);
+                if (time >= start && time <= end) {
+                    List<String> list = stringRedisTemplate.opsForList().range(key, -100, 100);
+                    BoundHashOperations<String, String, Object> ops
+                            = stringRedisTemplate.boundHashOps(SeckillConstant.SECKILL_SKU_CACHE);
+                    if (list != null) {
+                        List<Object> objects = ops.multiGet(list);
+                        if (objects != null) {
+                            return objects.stream().map(o -> JSON.parseObject((String) o, SeckillSkuRedisVo.class)).toList();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void saveSessionInfo(List<SeckillSessionsWithSkusVo> list) {
