@@ -96,6 +96,7 @@ public class SeckillServiceImpl implements SeckillService {
                         if (!(now >= start && now <= end)) {
                             vo.setRandomCode(null);
                         }
+                        return vo;
                     }
                 }
             }

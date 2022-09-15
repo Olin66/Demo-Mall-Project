@@ -587,10 +587,14 @@
         window.location.href = "http://search.olinmall.com/list.html?keyword=" + keyword;
     }
 
+    function jump(skuId) {
+        location.href = "http://item.olinmall.com/" + skuId + ".html"
+    }
+
     $.get("http://seckill.olinmall.com/currentSeckillSkus", function (resp) {
         if (resp.data.length > 0) {
             resp.data.forEach(function (item) {
-                $("<li></li>").append($("<img style='width: 130px;height: 130px;' src='" + item.skuInfo.skuDefaultImg + "'>"))
+                $("<li onclick='jump(" + item.skuId + ")'></li>").append($("<img style='width: 130px;height: 130px;' src='" + item.skuInfo.skuDefaultImg + "'>"))
                     .append($("<p>" + item.skuInfo.skuTitle + "</p>"))
                     .append($("<span>" + item.seckillPrice + "</span>"))
                     .append($("<s>" + item.skuInfo.price + "</s>"))
