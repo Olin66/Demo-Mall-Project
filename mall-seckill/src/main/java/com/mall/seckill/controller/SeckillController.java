@@ -6,6 +6,7 @@ import com.mall.seckill.vo.SeckillSkuRedisVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -26,5 +27,12 @@ public class SeckillController {
     public R getSkuSeckillInfo(@PathVariable("skuId") Long skuId) {
         SeckillSkuRedisVo vo = seckillService.getSkuSeckillInfo(skuId);
         return R.ok().put("data", vo);
+    }
+
+    @GetMapping("/kill")
+    public R seckill(@RequestParam("killId") String killId,
+                     @RequestParam("code") String code,
+                     @RequestParam("num") Integer num) {
+        return null;
     }
 }
