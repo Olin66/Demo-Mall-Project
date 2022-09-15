@@ -2,26 +2,30 @@ package com.mall.seckill.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.mall.common.constant.SeckillConstant;
+import com.mall.common.to.mq.SeckillOrderTo;
 import com.mall.common.utils.R;
+import com.mall.common.vo.MemberRespVo;
 import com.mall.seckill.feign.CouponFeignService;
 import com.mall.seckill.feign.ProductFeignService;
+import com.mall.seckill.interceptor.LoginUserInterceptor;
 import com.mall.seckill.service.SeckillService;
 import com.mall.seckill.vo.SeckillSessionsWithSkusVo;
 import com.mall.seckill.vo.SeckillSkuInfoVo;
 import com.mall.seckill.vo.SeckillSkuRedisVo;
+import org.apache.commons.lang.StringUtils;
 import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 @Service
@@ -35,6 +39,9 @@ public class SeckillServiceImpl implements SeckillService {
 
     @Autowired
     StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     @Autowired
     RedissonClient redissonClient;
@@ -104,6 +111,50 @@ public class SeckillServiceImpl implements SeckillService {
         return null;
     }
 
+    @Override
+    public String kill(String killId, String code, Integer num) {
+        BoundHashOperations<String, String, String> ops = stringRedisTemplate.boundHashOps(SeckillConstant.SECKILL_SKU_CACHE);
+        String json = ops.get(killId);
+        if (!StringUtils.isEmpty(json)) {
+            MemberRespVo user = LoginUserInterceptor.loginUser.get();
+            SeckillSkuRedisVo redisVo = JSONObject.parseObject(json, SeckillSkuRedisVo.class);
+            long startTime = redisVo.getStartTime();
+            long endTime = redisVo.getEndTime();
+            long now = new Date().getTime();
+            long ttl = endTime - now;
+            if (now >= startTime && now <= endTime) {
+                String randomCode = redisVo.getRandomCode();
+                String id = redisVo.getPromotionSessionId() + "_" + redisVo.getSkuId();
+                if (Objects.equals(randomCode, code) && Objects.equals(id, killId)) {
+                    Integer limit = redisVo.getSeckillLimit();
+                    if (num <= limit) {
+                        String redisKey = user.getId().toString() + "_" + id;
+                        Boolean flag = stringRedisTemplate.opsForValue().setIfAbsent(SeckillConstant.SECKILL_OF_USER +
+                                redisKey, num.toString(), ttl, TimeUnit.MILLISECONDS);
+                        if (Boolean.TRUE.equals(flag)) {
+                            RSemaphore semaphore
+                                    = redissonClient.getSemaphore(randomCode);
+                            boolean b = semaphore.tryAcquire(num);
+                            if (b) {
+                                String orderSn = UUID.randomUUID().toString();
+                                SeckillOrderTo to = new SeckillOrderTo();
+                                to.setOrderSn(orderSn);
+                                to.setMemberId(user.getId());
+                                to.setNum(num);
+                                to.setPromotionSessionId(redisVo.getPromotionSessionId());
+                                to.setSkuId(redisVo.getSkuId());
+                                to.setSeckillPrice(redisVo.getSeckillPrice());
+                                rabbitTemplate.convertAndSend("order-event-exchange", "order.seckill.order", to);
+                                return orderSn;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     private void saveSessionInfo(List<SeckillSessionsWithSkusVo> list) {
         list.forEach(session -> {
             long startTime = session.getStartTime().getTime();
@@ -138,7 +189,7 @@ public class SeckillServiceImpl implements SeckillService {
                     redisVo.setRandomCode(token);
                     String json = JSON.toJSONString(redisVo);
                     ops.put(vo.getPromotionSessionId().toString() + "_" + vo.getSkuId().toString(), json);
-                    RSemaphore semaphore = redissonClient.getSemaphore(SeckillConstant.SKU_STOCK_SEMAPHORE_PREFIX + token);
+                    RSemaphore semaphore = redissonClient.getSemaphore(token);
                     semaphore.trySetPermits(vo.getSeckillCount());
                 }
             });

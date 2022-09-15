@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mall.common.constant.OrderConstant;
 import com.mall.common.to.SkuHasStockTo;
 import com.mall.common.to.mq.OrderTo;
+import com.mall.common.to.mq.SeckillOrderTo;
 import com.mall.common.utils.PageUtils;
 import com.mall.common.utils.Query;
 import com.mall.common.utils.R;
@@ -234,11 +235,26 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         entity.setOrderSn(vo.getOut_trade_no());
         entity.setPaymentStatus(vo.getTrade_status());
         paymentInfoService.save(entity);
-        if(vo.getTrade_status().equals("TRADE_SUCCESS") || vo.getTrade_status().equals("TRADE_FINISHED")) {
+        if (vo.getTrade_status().equals("TRADE_SUCCESS") || vo.getTrade_status().equals("TRADE_FINISHED")) {
             String orderSn = vo.getOut_trade_no();
             this.baseMapper.updateOrderStatus(orderSn, OrderStatusEnum.PAYED.getCode());
         }
         return "success";
+    }
+
+    @Override
+    public void createSeckillOrder(SeckillOrderTo to) {
+        OrderEntity order = new OrderEntity();
+        order.setOrderSn(to.getOrderSn());
+        order.setMemberId(to.getMemberId());
+        order.setStatus(OrderStatusEnum.CREATE_NEW.getCode());
+        order.setPayAmount(to.getSeckillPrice().multiply(new BigDecimal(to.getNum())));
+        this.save(order);
+        OrderItemEntity item = new OrderItemEntity();
+        item.setOrderSn(to.getOrderSn());
+        item.setSkuQuantity(to.getNum());
+        item.setRealAmount(to.getSeckillPrice().multiply(new BigDecimal(to.getNum())));
+        orderItemService.save(item);
     }
 
     private void saveOrder(OrderCreateVo order) {

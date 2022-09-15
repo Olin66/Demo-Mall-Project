@@ -21,10 +21,10 @@ public class SeckillSkuScheduled {
     @Autowired
     RedissonClient redissonClient;
 
-    @Scheduled(cron = "*/20 * * * * ?")
+    @Scheduled(cron = "*/59 * * * * ?")
     public void uploadSeckillSkuLatestThreeDays() {
         RLock lock = redissonClient.getLock(SeckillConstant.UPLOAD_LOCK);
-        lock.lock(1, TimeUnit.MINUTES);
+        lock.lock(10, TimeUnit.SECONDS);
         try {
             seckillService.uploadSeckillSkuLatestThreeDays();
         } finally {
