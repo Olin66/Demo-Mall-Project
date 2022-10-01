@@ -4,3 +4,4 @@
 renren-fast/* linguist-vendored
 renren-generator/* linguist-vendored
 mall-frontend/* linguist-vendored
+*.js linguist-vendored
