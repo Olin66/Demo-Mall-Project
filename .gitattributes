@@ -1,6 +1,6 @@
 *.xml linguist-language=java
 *.yml linguist-language=java
 *.properties linguist-language=java
-renren-fast/*.js linguist-vendored
-renren-generator/*.js linguist-vendored
-mall-frontend/*.js linguist-vendored
+renren-fast/* linguist-vendored
+renren-generator/* linguist-vendored
+mall-frontend/* linguist-vendored
