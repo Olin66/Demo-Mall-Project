@@ -1,5 +1,4 @@
 *.xml linguist-language=java
 *.yml linguist-language=java
 *.properties linguist-language=java
-renren-fast/** linguist-vendored
 renren-generator/** linguist-vendored
